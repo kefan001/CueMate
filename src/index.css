@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-billiards-900: #022c22;
+  --color-billiards-800: #064e3b;
+  --color-billiards-700: #047857;
+  --color-billiards-600: #059669;
+  --color-billiards-500: #10b981;
+  --color-billiards-400: #34d399;
+  
+  --color-gold-900: #713f12;
+  --color-gold-500: #eab308;
+  --color-gold-400: #facc15;
+  --color-gold-300: #fde047;
+}
+
+body {
+  @apply bg-zinc-950 text-zinc-50 antialiased;
+}
