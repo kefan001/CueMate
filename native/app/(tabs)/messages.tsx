@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { nativeThreads } from '../../src/mock';
 import { theme } from '../../src/theme';
 
@@ -11,14 +11,14 @@ export default function MessagesScreen() {
 
       {nativeThreads.map(thread => (
         <Link key={thread.id} href={`/messages/${thread.id}`} asChild>
-          <View style={styles.card}>
+          <Pressable style={styles.card}>
             <View style={styles.row}>
               <Text style={styles.name}>{thread.peerName}</Text>
               <Text style={styles.time}>{thread.createdAt}</Text>
             </View>
             <Text style={styles.preview}>{thread.preview}</Text>
             {thread.unreadCount > 0 ? <Text style={styles.badge}>{thread.unreadCount} 条未读</Text> : null}
-          </View>
+          </Pressable>
         </Link>
       ))}
     </ScrollView>

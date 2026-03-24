@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { nativeCompanions } from '../../src/mock';
 import { theme } from '../../src/theme';
 
@@ -11,7 +11,7 @@ export default function DiscoveryScreen() {
 
       {nativeCompanions.map(companion => (
         <Link key={companion.id} href={`/companion/${companion.id}`} asChild>
-          <View style={styles.card}>
+          <Pressable style={styles.card}>
             <Image source={{ uri: companion.avatar }} style={styles.avatar} />
             <View style={styles.info}>
               <Text style={styles.name}>{companion.name}</Text>
@@ -19,7 +19,7 @@ export default function DiscoveryScreen() {
               <Text style={styles.meta}>¥{companion.hourlyRate}/小时 · {companion.distance}</Text>
               <Text style={styles.meta}>评分 {companion.rating} · {companion.reviewCount} 条</Text>
             </View>
-          </View>
+          </Pressable>
         </Link>
       ))}
     </ScrollView>
