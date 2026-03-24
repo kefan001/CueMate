@@ -22,6 +22,5 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  },
-  "exclude": ["native"]
+  }
 }

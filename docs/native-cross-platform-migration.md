@@ -18,18 +18,18 @@
 
 ## 当前仓库里已经准备好的内容
 
-仓库新增了一个 `native/` 目录，里面放了一套原生 App 迁移骨架：
+仓库新增了一个 `app/` 目录，里面放了一套原生 App 迁移骨架：
 
-- `native/app/_layout.tsx`
-- `native/app/(tabs)/_layout.tsx`
-- `native/app/(tabs)/index.tsx`
-- `native/app/(tabs)/orders.tsx`
-- `native/app/(tabs)/messages.tsx`
-- `native/app/(tabs)/profile.tsx`
-- `native/app/messages/[threadId].tsx`
-- `native/app/companion/[id].tsx`
-- `native/src/mock.ts`
-- `native/src/theme.ts`
+- `app/app/_layout.tsx`
+- `app/app/(tabs)/_layout.tsx`
+- `app/app/(tabs)/index.tsx`
+- `app/app/(tabs)/orders.tsx`
+- `app/app/(tabs)/messages.tsx`
+- `app/app/(tabs)/profile.tsx`
+- `app/app/messages/[threadId].tsx`
+- `app/app/companion/[id].tsx`
+- `app/src/mock.ts`
+- `app/src/theme.ts`
 
 这套骨架做了几件事：
 
@@ -53,12 +53,12 @@
 
 ## Web 到原生的文件映射建议
 
-- `src/pages/Discovery.tsx` -> `native/app/(tabs)/index.tsx`
-- `src/pages/Orders.tsx` -> `native/app/(tabs)/orders.tsx`
-- `src/pages/Messages.tsx` -> `native/app/(tabs)/messages.tsx`
-- `src/pages/Profile.tsx` -> `native/app/(tabs)/profile.tsx`
-- `src/pages/CompanionDetail.tsx` -> `native/app/companion/[id].tsx`
-- `src/pages/ChatThread.tsx` -> `native/app/messages/[threadId].tsx`
+- `web/src/pages/Discovery.tsx` -> `app/app/(tabs)/index.tsx`
+- `web/src/pages/Orders.tsx` -> `app/app/(tabs)/orders.tsx`
+- `web/src/pages/Messages.tsx` -> `app/app/(tabs)/messages.tsx`
+- `web/src/pages/Profile.tsx` -> `app/app/(tabs)/profile.tsx`
+- `web/src/pages/CompanionDetail.tsx` -> `app/app/companion/[id].tsx`
+- `web/src/pages/ChatThread.tsx` -> `app/app/messages/[threadId].tsx`
 
 ## 下一步最值得做的
 
