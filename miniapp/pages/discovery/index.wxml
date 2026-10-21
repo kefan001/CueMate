@@ -1,0 +1,175 @@
+<view class="page-shell">
+  <view class="page-header">
+    <view class="row-between">
+      <view>
+        <view class="brand-row">
+          <view class="brand-dot"></view>
+          <text class="page-title">CueMate</text>
+        </view>
+        <view class="loc-row">
+          <text class="loc-pin">📍</text>
+          <text class="loc-city">{{user.locationCity || '北京市朝阳区'}}</text>
+        </view>
+        <view class="loc-label">{{user.locationLabel}}</view>
+      </view>
+
+      <view class="header-actions">
+        <view class="circle-btn {{user.locationStatus === 'granted' ? 'circle-btn-granted' : ''}}" bindtap="onRequestLocation">
+          <text>⊕</text>
+        </view>
+        <view class="circle-btn" bindtap="onOpenSearch">
+          <text>🔍</text>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view scroll-x class="tabs-scroll" show-scrollbar="{{false}}">
+      <view class="tabs-row">
+        <view
+          wx:for="{{tabs}}"
+          wx:key="*this"
+          class="tab-item {{activeTab === item ? 'tab-item-active' : ''}}"
+          data-tab="{{item}}"
+          bindtap="onSelectTab"
+        >
+          <text>{{item}}</text>
+          <view wx:if="{{activeTab === item}}" class="tab-indicator"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="page-body">
+    <view class="row-between list-bar">
+      <text class="list-count">{{query ? '搜索结果 ' + list.length + ' 位' : '为您推荐 ' + list.length + ' 位陪玩'}}</text>
+      <view class="filter-trigger" bindtap="onOpenFilter">
+        <text>⛭ 筛选</text>
+      </view>
+    </view>
+
+    <view wx:if="{{list.length === 0}}" class="empty-box">
+      暂无符合筛选条件的陪玩
+    </view>
+
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="card companion-card"
+      data-id="{{item.id}}"
+      bindtap="onTapCompanion"
+    >
+      <view class="companion-row">
+        <view class="avatar-wrap">
+          <image class="companion-avatar" src="{{item.avatar}}" mode="aspectFill" />
+          <view class="distance-badge">{{item.distance}}</view>
+        </view>
+
+        <view class="companion-main">
+          <view class="row-between">
+            <view>
+              <view class="companion-name">{{item.name}}</view>
+              <view class="companion-level">{{item.level}}</view>
+            </view>
+            <view class="price-box">
+              <view class="price-val">¥{{item.hourlyRate}}</view>
+              <view class="price-unit">/小时</view>
+            </view>
+          </view>
+
+          <view class="rating-row">
+            <text class="star-icon">★</text>
+            <text class="rating-val">{{item.rating}}</text>
+            <text class="rating-count">({{item.reviewCount}})</text>
+          </view>
+
+          <view class="tags-wrap">
+            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="tag">{{tag}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav active="discovery" />
+
+  <modal-sheet open="{{openSearch}}" title="搜索陪玩" bind:close="onCloseSearch">
+    <view class="modal-section">
+      <view class="search-input-wrap">
+        <text class="search-icon">🔍</text>
+        <input
+          class="search-input"
+          value="{{query}}"
+          bindinput="onQueryInput"
+          placeholder="输入姓名 / 标签 / 玩法"
+          placeholder-style="color:#71717a;"
+        />
+        <text wx:if="{{query}}" class="clear-btn" bindtap="onClearQuery">✕</text>
+      </view>
+
+      <view class="row-between filter-meta">
+        <text class="text-muted">当前筛选</text>
+        <text class="reset-link" bindtap="onResetAll">重置</text>
+      </view>
+
+      <view class="pill-wrap">
+        <view
+          wx:for="{{tabs}}"
+          wx:key="*this"
+          class="pill {{activeTab === item ? 'pill-active' : ''}}"
+          data-tab="{{item}}"
+          bindtap="onSelectTab"
+        >
+          {{item}}
+        </view>
+      </view>
+
+      <view class="btn-secondary" bindtap="onOpenFilter">
+        ⛭ 更多筛选
+      </view>
+    </view>
+  </modal-sheet>
+
+  <modal-sheet open="{{openFilter}}" title="筛选与排序" bind:close="onCloseFilter">
+    <view class="modal-section">
+      <view class="row-between">
+        <text class="filter-label">最高时薪</text>
+        <text class="filter-val">¥{{priceMax}}</text>
+      </view>
+      <slider
+        min="50"
+        max="500"
+        step="10"
+        value="{{priceMax}}"
+        activeColor="#10b981"
+        backgroundColor="#27272a"
+        block-size="20"
+        bindchange="onPriceChange"
+      />
+      <view class="filter-tip">提示：这是演示用筛选，数据来自共享 mock 层。</view>
+
+      <view class="filter-label" style="margin-top: 24rpx;">排序</view>
+      <view class="sort-grid">
+        <view
+          class="pill sort-btn {{sort === 'smart' ? 'pill-active' : ''}}"
+          data-sort="smart"
+          bindtap="onSelectSort"
+        >智能</view>
+        <view
+          class="pill sort-btn {{sort === 'price_low' ? 'pill-active' : ''}}"
+          data-sort="price_low"
+          bindtap="onSelectSort"
+        >低价优先</view>
+        <view
+          class="pill sort-btn {{sort === 'rating_high' ? 'pill-active' : ''}}"
+          data-sort="rating_high"
+          bindtap="onSelectSort"
+        >高分优先</view>
+      </view>
+
+      <view class="modal-actions">
+        <view class="btn-secondary action-half" bindtap="onResetFilter">重置</view>
+        <view class="btn-primary action-half" bindtap="onCloseFilter">查看结果（{{list.length}}）</view>
+      </view>
+    </view>
+  </modal-sheet>
+</view>

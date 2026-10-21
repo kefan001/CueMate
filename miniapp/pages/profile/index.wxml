@@ -1,0 +1,248 @@
+<view class="page-shell">
+  <view class="page-header">
+    <view class="page-title" style="margin-bottom: 32rpx;">我的</view>
+
+    <view class="profile-hero">
+      <view class="avatar-box">
+        <image class="user-avatar" src="{{user.avatar}}" mode="aspectFill" />
+        <view class="verify-dot">✓</view>
+      </view>
+
+      <view class="user-meta">
+        <view class="user-name">{{user.name}}</view>
+        <view class="user-id">ID: {{user.id}}</view>
+        <view class="user-phone">{{user.phone}}</view>
+        <view wx:if="{{user.bio}}" class="user-bio">{{user.bio}}</view>
+        <view class="role-tag">{{user.role === 'user' ? '普通用户' : '陪玩身份'}}</view>
+      </view>
+
+      <view class="gear-btn" bindtap="onOpenEdit">⚙</view>
+    </view>
+  </view>
+
+  <view class="page-body">
+    <view class="wallet-grid">
+      <view class="card wallet-card" bindtap="onOpenWallet">
+        <view class="w-head">💳 钱包余额</view>
+        <view class="w-val">
+          <text class="w-unit">¥</text>
+          <text>{{balanceFixed}}</text>
+        </view>
+      </view>
+
+      <view class="card wallet-card">
+        <view class="w-head">🎟 优惠券</view>
+        <view class="w-val">
+          <text>{{user.coupons}}</text>
+          <text class="w-unit"> 张</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="row-between">
+        <view>
+          <view class="loc-head">📍 当前位置</view>
+          <view class="loc-main">{{user.locationCity || '未开启定位'}}</view>
+          <view class="loc-sub">{{user.locationLabel}}</view>
+        </view>
+        <view class="loc-btn {{user.locationStatus === 'granted' ? 'loc-btn-on' : ''}}" bindtap="onRequestLocation">
+          ⊕
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="row-between">
+        <view>
+          <view class="loc-head">★ {{reviewTitle}}</view>
+          <view class="loc-sub">{{reviewHint}}</view>
+        </view>
+        <view style="text-align:right;">
+          <view class="rev-avg">{{reviewSummary.count > 0 ? reviewSummary.average : '--'}}</view>
+          <view class="loc-sub">{{reviewSummary.count}} 条 · 好评率 {{reviewSummary.positiveRate}}%</view>
+        </view>
+      </view>
+
+      <view wx:if="{{reviewSummary.topTags.length}}" class="top-tags-row">
+        <text wx:for="{{reviewSummary.topTags}}" wx:key="tag" class="pill pill-active">{{item.tag}}</text>
+      </view>
+
+      <view wx:if="{{receivedReviews.length === 0}}" class="card-inner empty-rep">
+        完成订单后，这里会沉淀对你本人的服务口碑。
+      </view>
+      <view wx:else class="rep-list">
+        <view wx:for="{{receivedReviews}}" wx:key="orderId" class="card-inner rep-item">
+          <view class="row-between">
+            <text class="rep-author">{{item.displayAuthorName}}</text>
+            <view class="rep-stars">
+              <text wx:for="{{item.stars}}" wx:key="*this">★</text>
+            </view>
+          </view>
+          <view wx:if="{{item.tags && item.tags.length}}" class="rep-tags">
+            <text wx:for="{{item.tags}}" wx:for-item="t" wx:key="*this" class="tag">{{t}}</text>
+          </view>
+          <view class="rep-content">{{item.content}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card menu-card">
+      <view class="menu-item" bindtap="onOpenRole">
+        <view class="menu-left">
+          <view class="menu-icon icon-green">🛡</view>
+          <view>
+            <view class="menu-title">切换身份（演示）</view>
+            <view class="menu-sub">当前：{{user.role === 'user' ? '用户端' : '陪玩端'}}</view>
+          </view>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="onOpenEdit">
+        <view class="menu-left">
+          <view class="menu-icon">✎</view>
+          <view>
+            <view class="menu-title">编辑资料</view>
+            <view class="menu-sub">昵称、简介、性别偏好</view>
+          </view>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" data-tip="可在「切换身份」中直接体验陪玩端工作台" bindtap="onMenuTip">
+        <view class="menu-left">
+          <view class="menu-icon icon-gold">★</view>
+          <view class="menu-title">成为陪玩 / 达人认证</view>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item" data-tip="已支持手机号验证码登录与找回密码" bindtap="onMenuTip">
+        <view class="menu-left">
+          <view class="menu-icon icon-green">📱</view>
+          <view>
+            <view class="menu-title">账号安全</view>
+            <view class="menu-sub">支持验证码登录与找回密码</view>
+          </view>
+        </view>
+        <text class="menu-sub">{{user.lastLoginAt ? '最近已登录' : '未记录'}}</text>
+      </view>
+
+      <view class="menu-item" data-tip="客服热线：400-800-8899（演示）" bindtap="onMenuTip">
+        <view class="menu-left">
+          <view class="menu-icon">❓</view>
+          <view class="menu-title">帮助中心与客服</view>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+
+      <view class="menu-item menu-item-last" data-tip="当前版本：v1.0.0 小程序版" bindtap="onMenuTip">
+        <view class="menu-left">
+          <view class="menu-icon">⚙</view>
+          <view class="menu-title">通用设置</view>
+        </view>
+        <text class="menu-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="bottom-btn-grid">
+      <view class="btn-secondary" bindtap="onLogout">退出登录</view>
+      <view class="btn-reset" bindtap="onResetData">重置演示数据</view>
+    </view>
+  </view>
+
+  <bottom-nav active="profile" />
+
+  <!-- 钱包 Modal -->
+  <modal-sheet open="{{openWallet}}" title="钱包" bind:close="onCloseWallet">
+    <view class="modal-stack">
+      <view class="row-between">
+        <text class="text-muted">当前余额</text>
+        <text class="wallet-modal-bal">¥{{balanceFixed}}</text>
+      </view>
+      <view class="charge-grid">
+        <view class="btn-secondary" data-amount="50" bindtap="onCharge">充值 ¥50</view>
+        <view class="btn-secondary" data-amount="100" bindtap="onCharge">充值 ¥100</view>
+        <view class="btn-secondary" data-amount="300" bindtap="onCharge">充值 ¥300</view>
+      </view>
+      <view class="loc-sub">说明：这是演示用的“钱包充值”，用于体验订单支付流程。</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 编辑资料 Modal -->
+  <modal-sheet open="{{openEdit}}" title="编辑资料" bind:close="onCloseEdit">
+    <view class="modal-stack">
+      <view>
+        <view class="field-label">昵称</view>
+        <input
+          class="input-box"
+          value="{{profileName}}"
+          data-field="profileName"
+          bindinput="onInputField"
+        />
+      </view>
+      <view>
+        <view class="field-label">自我介绍</view>
+        <textarea
+          class="textarea-box"
+          value="{{profileBio}}"
+          data-field="profileBio"
+          bindinput="onInputField"
+        />
+      </view>
+      <view>
+        <view class="field-label">性别</view>
+        <view class="charge-grid">
+          <view
+            class="pill gender-btn {{profileGender === 'male' ? 'pill-active' : ''}}"
+            data-gender="male"
+            bindtap="onSelectGender"
+          >男</view>
+          <view
+            class="pill gender-btn {{profileGender === 'female' ? 'pill-active' : ''}}"
+            data-gender="female"
+            bindtap="onSelectGender"
+          >女</view>
+          <view
+            class="pill gender-btn {{profileGender === 'other' ? 'pill-active' : ''}}"
+            data-gender="other"
+            bindtap="onSelectGender"
+          >保密</view>
+        </view>
+      </view>
+      <view wx:if="{{profileHint}}" class="hint-green">{{profileHint}}</view>
+      <view class="btn-primary" bindtap="onSaveProfile">保存资料</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 选择身份 Modal -->
+  <modal-sheet open="{{openRole}}" title="选择身份" bind:close="onCloseRole">
+    <view class="modal-stack">
+      <view
+        class="role-card {{user.role === 'user' ? 'role-card-active' : ''}}"
+        bindtap="onSwitchToUser"
+      >
+        <view class="role-card-title">用户端</view>
+        <view class="loc-sub">浏览陪玩、预约下单、支付核销</view>
+      </view>
+
+      <view class="loc-sub">陪玩端（选择“我是谁”）</view>
+      <view class="role-comp-list">
+        <view
+          wx:for="{{companions}}"
+          wx:key="id"
+          class="role-card role-comp-row {{user.role === 'companion' && user.companionId === item.id ? 'role-card-active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onSwitchToCompanion"
+        >
+          <image class="role-comp-avatar" src="{{item.avatar}}" mode="aspectFill" />
+          <view>
+            <view class="role-card-title">{{item.name}}</view>
+            <view class="loc-sub">{{item.level}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </modal-sheet>
+</view>

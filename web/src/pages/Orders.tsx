@@ -8,10 +8,17 @@ import { useOrders } from '../context/OrderContext';
 import { useUser } from '../context/UserContext';
 import Modal from '../components/Modal';
 import { useChat } from '../context/ChatContext';
-import { ORDER_STATUS_META, formatOrderTime, getRefundDescription } from '../lib/orders';
+import {
+  ORDER_STATUS_META,
+  formatOrderTime,
+  getRefundDescription,
+  getOrderVerificationCode,
+  filterUserOrders,
+} from '../lib/orders';
+import { USER_ORDER_TABS } from '../../../shared/cuemate-core';
 import { USER_REVIEW_TAGS } from '../lib/reviews';
 
-const TABS = ['全部', '待支付', '待服务', '服务中', '待确认', '售后', '已完成'] as const;
+const TABS = USER_ORDER_TABS;
 
 export default function Orders() {
   const navigate = useNavigate();
@@ -42,10 +49,7 @@ export default function Orders() {
   const followUpOrder = useMemo(() => (followUpOrderId ? orders.find(o => o.id === followUpOrderId) : undefined), [orders, followUpOrderId]);
   const disputeOrder = useMemo(() => (disputeOrderId ? orders.find(o => o.id === disputeOrderId) : undefined), [orders, disputeOrderId]);
 
-  const verificationCode = (order: Order) => {
-    const seed = order.id.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 1000000;
-    return String(seed).padStart(6, '0');
-  };
+  const verificationCode = (order: Order) => getOrderVerificationCode(order);
 
   const openChat = (order: Order) => {
     const threadId = ensureThread({
@@ -63,16 +67,7 @@ export default function Orders() {
     navigate(`/messages/${threadId}`);
   };
 
-  const filteredOrders = orders.filter(order => {
-    if (activeTab === '全部') return true;
-    if (activeTab === '待支付') return order.status === 'pending_payment';
-    if (activeTab === '待服务') return ['paid', 'no_show_companion', 'no_show_user'].includes(order.status);
-    if (activeTab === '服务中') return order.status === 'in_progress';
-    if (activeTab === '待确认') return order.status === 'awaiting_confirmation';
-    if (activeTab === '售后') return ['cancelled', 'refunded', 'disputed', 'no_show_companion', 'no_show_user'].includes(order.status);
-    if (activeTab === '已完成') return order.status === 'completed';
-    return true;
-  });
+  const filteredOrders = filterUserOrders(orders, activeTab);
 
   const confirmPay = () => {
     if (!payingOrder) return;

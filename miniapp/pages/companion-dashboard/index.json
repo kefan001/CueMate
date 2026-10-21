@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "接单台",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

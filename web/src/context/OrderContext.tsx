@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import type { Order } from '../data/mock';
 import { mockOrders } from '../data/mock';
+import { STORAGE_KEYS, normalizeOrder } from '../../../shared/cuemate-core';
 import { readJson, writeJson } from '../utils/storage';
 
 interface OrderContextValue {
@@ -11,17 +12,7 @@ interface OrderContextValue {
 
 const OrderContext = createContext<OrderContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'cuemate.orders.v1';
-
-function normalizeOrder(order: Order & { review?: Order['customerReview'] }) {
-  if (order.customerReview || !order.review) {
-    return order as Order;
-  }
-  return {
-    ...order,
-    customerReview: order.review,
-  } as Order;
-}
+const STORAGE_KEY = STORAGE_KEYS.ORDERS;
 
 export function OrderProvider({ children }: PropsWithChildren) {
   const [orders, setOrders] = useState<Order[]>(() =>

@@ -1,0 +1,130 @@
+.conn-hint {
+  font-size: 22rpx;
+  color: #52525b;
+  margin-top: 8rpx;
+}
+
+.msg-badge-icon {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 28rpx;
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 2rpx solid rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+}
+
+.empty-chat {
+  text-align: center;
+  margin-top: 140rpx;
+}
+
+.empty-circle {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 999rpx;
+  background-color: #18181b;
+  border: 2rpx solid #27272a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28rpx;
+  font-size: 48rpx;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #71717a;
+  margin-top: 12rpx;
+}
+
+.thread-row {
+  display: flex;
+  gap: 28rpx;
+}
+
+.peer-avatar-wrap {
+  position: relative;
+  width: 112rpx;
+  height: 112rpx;
+  flex-shrink: 0;
+}
+
+.peer-avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 28rpx;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  min-width: 38rpx;
+  height: 38rpx;
+  padding: 0 10rpx;
+  border-radius: 999rpx;
+  background-color: #f43f5e;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thread-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.peer-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.msg-time {
+  font-size: 22rpx;
+  color: #71717a;
+  margin-top: 6rpx;
+}
+
+.arrow-right {
+  font-size: 36rpx;
+  color: #52525b;
+}
+
+.msg-preview {
+  font-size: 26rpx;
+  color: #d4d4d8;
+  margin-top: 18rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-pill {
+  margin-top: 20rpx;
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  border-radius: 999rpx;
+  background-color: rgba(9, 9, 11, 0.85);
+  border: 2rpx solid #27272a;
+  padding: 10rpx 22rpx;
+  font-size: 22rpx;
+  color: #a1a1aa;
+}
+
+.schedule-icon {
+  color: #34d399;
+}

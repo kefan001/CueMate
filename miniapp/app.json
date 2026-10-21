@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/discovery/index",
+    "pages/auth/index",
+    "pages/companion-detail/index",
+    "pages/orders/index",
+    "pages/messages/index",
+    "pages/chat-thread/index",
+    "pages/companion-dashboard/index",
+    "pages/companion-orders/index",
+    "pages/companion-schedule/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#09090b",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "CueMate",
+    "backgroundColor": "#09090b",
+    "backgroundTextStyle": "dark"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于查找附近的台球俱乐部与陪玩"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "lazyCodeLoading": "requiredComponents",
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,78 @@
+<view class="bottom-nav">
+  <view class="nav-row">
+    <block wx:if="{{role === 'user'}}">
+      <view
+        class="nav-item {{active === 'discovery' ? 'nav-item-active' : ''}}"
+        data-key="discovery"
+        data-url="/pages/discovery/index"
+        bindtap="onNavigate"
+      >
+        <text class="nav-icon">◎</text>
+        <text class="nav-label">发现</text>
+      </view>
+    </block>
+    <block wx:else>
+      <view
+        class="nav-item {{active === 'companion-dashboard' ? 'nav-item-active' : ''}}"
+        data-key="companion-dashboard"
+        data-url="/pages/companion-dashboard/index"
+        bindtap="onNavigate"
+      >
+        <text class="nav-icon">◈</text>
+        <text class="nav-label">接单台</text>
+      </view>
+    </block>
+
+    <view
+      class="nav-item {{active === 'messages' ? 'nav-item-active' : ''}}"
+      data-key="messages"
+      data-url="/pages/messages/index"
+      bindtap="onNavigate"
+    >
+      <text class="nav-icon">💬</text>
+      <text class="nav-label">聊天</text>
+    </view>
+
+    <block wx:if="{{role === 'user'}}">
+      <view
+        class="nav-item {{active === 'orders' ? 'nav-item-active' : ''}}"
+        data-key="orders"
+        data-url="/pages/orders/index"
+        bindtap="onNavigate"
+      >
+        <text class="nav-icon">▤</text>
+        <text class="nav-label">订单</text>
+      </view>
+    </block>
+    <block wx:else>
+      <view
+        class="nav-item {{active === 'companion-orders' ? 'nav-item-active' : ''}}"
+        data-key="companion-orders"
+        data-url="/pages/companion-orders/index"
+        bindtap="onNavigate"
+      >
+        <text class="nav-icon">▤</text>
+        <text class="nav-label">接单</text>
+      </view>
+      <view
+        class="nav-item {{active === 'companion-schedule' ? 'nav-item-active' : ''}}"
+        data-key="companion-schedule"
+        data-url="/pages/companion-schedule/index"
+        bindtap="onNavigate"
+      >
+        <text class="nav-icon">📅</text>
+        <text class="nav-label">日程</text>
+      </view>
+    </block>
+
+    <view
+      class="nav-item {{active === 'profile' ? 'nav-item-active' : ''}}"
+      data-key="profile"
+      data-url="/pages/profile/index"
+      bindtap="onNavigate"
+    >
+      <text class="nav-icon">●</text>
+      <text class="nav-label">我的</text>
+    </view>
+  </view>
+</view>

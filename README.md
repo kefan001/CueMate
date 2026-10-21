@@ -1,13 +1,24 @@
 # CueMate Monorepo
 
-这个仓库现在按三端结构整理好了：
+这个仓库按多端共享结构组织：
 
-- `web/`：Web 端 H5 / 管理前台原型
-- `app/`：Expo + React Native 原生 App
+- `shared/`：Web 端与微信小程序端共享的核心业务逻辑、状态规则与 Mock 数据层
+- `web/`：Web 端 H5 原型（React + Vite + TypeScript + Tailwind）
+- `miniapp/`：微信小程序端（与 `web/` 100% 功能对齐，可直接用微信开发者工具导入运行）
+- `app/`：Expo + React Native 原生 App 骨架
 - `server/`：后端服务骨架
 - `docs/`：迁移和架构文档
 
 ## 目录说明
+
+### `miniapp/`（微信小程序端）
+
+直接打开 **微信开发者工具 -> 导入项目**，选择 `miniapp/` 目录即可运行。
+若修改了 `shared/cuemate-core.js`，可运行：
+
+```bash
+npm run sync:shared
+```
 
 ### `web/`
 
@@ -60,6 +71,7 @@ npm run dev
 你也可以直接在根目录运行：
 
 ```bash
+npm run sync:shared
 npm run dev:web
 npm run dev:app
 npm run dev:server

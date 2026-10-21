@@ -1,0 +1,137 @@
+<view class="auth-page">
+  <view>
+    <view class="auth-hero">
+      <view class="auth-badge">
+        <text>📍 登录后即可开启附近陪玩、定位和订单履约功能</text>
+      </view>
+      <view class="auth-brand">CueMate</view>
+      <view class="auth-sub">这次把登录、验证码和找回密码也做顺了。</view>
+    </view>
+
+    <view class="auth-card">
+      <view class="mode-switch">
+        <view
+          class="mode-btn {{mode === 'login' ? 'mode-btn-active' : ''}}"
+          data-mode="login"
+          bindtap="setMode"
+        >登录</view>
+        <view
+          class="mode-btn {{mode === 'register' ? 'mode-btn-active' : ''}}"
+          data-mode="register"
+          bindtap="setMode"
+        >注册</view>
+        <view
+          class="mode-btn {{mode === 'reset_password' ? 'mode-btn-active' : ''}}"
+          data-mode="reset_password"
+          bindtap="setMode"
+        >找回密码</view>
+      </view>
+
+      <view wx:if="{{mode === 'login'}}" class="sub-switch">
+        <view
+          class="sub-btn {{loginMethod === 'password' ? 'sub-btn-active' : ''}}"
+          data-method="password"
+          bindtap="setLoginMethod"
+        >密码登录</view>
+        <view
+          class="sub-btn {{loginMethod === 'code' ? 'sub-btn-active' : ''}}"
+          data-method="code"
+          bindtap="setLoginMethod"
+        >验证码登录</view>
+      </view>
+
+      <view class="form-area">
+        <view wx:if="{{mode === 'register'}}" class="field-group">
+          <view class="field-label">昵称</view>
+          <input
+            class="input-box"
+            value="{{name}}"
+            data-field="name"
+            bindinput="onInput"
+            placeholder="输入你的昵称"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+
+        <view class="field-group">
+          <view class="field-label">手机号</view>
+          <input
+            class="input-box"
+            type="number"
+            maxlength="11"
+            value="{{phone}}"
+            data-field="phone"
+            bindinput="onInput"
+            placeholder="请输入手机号"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+
+        <view wx:if="{{mode !== 'reset_password' && !(mode === 'login' && loginMethod === 'code')}}" class="field-group">
+          <view class="field-label">密码</view>
+          <input
+            class="input-box"
+            password
+            value="{{password}}"
+            data-field="password"
+            bindinput="onInput"
+            placeholder="至少 6 位"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+
+        <view wx:if="{{mode === 'reset_password'}}" class="field-group">
+          <view class="field-label">新密码</view>
+          <input
+            class="input-box"
+            password
+            value="{{newPassword}}"
+            data-field="newPassword"
+            bindinput="onInput"
+            placeholder="设置新的登录密码"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+
+        <view wx:if="{{mode === 'register' || mode === 'reset_password' || (mode === 'login' && loginMethod === 'code')}}" class="field-group">
+          <view class="field-label">验证码</view>
+          <view class="code-row">
+            <input
+              class="input-box code-input"
+              type="number"
+              maxlength="6"
+              value="{{code}}"
+              data-field="code"
+              bindinput="onInput"
+              placeholder="输入 6 位验证码"
+              placeholder-style="color:#52525b;"
+            />
+            <view
+              class="code-btn {{countdown > 0 ? 'code-btn-disabled' : ''}}"
+              bindtap="sendCode"
+            >
+              {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{error}}" class="msg-error">{{error}}</view>
+        <view wx:if="{{hint}}" class="msg-hint">{{hint}}</view>
+        <view wx:if="{{demoCode}}" class="msg-demo">演示验证码：{{demoCode}}</view>
+
+        <view class="btn-primary submit-btn" bindtap="handleSubmit">
+          {{mode === 'login' ? '进入 CueMate' : mode === 'register' ? '注册并进入' : '重置密码'}}
+        </view>
+
+        <view class="demo-tip">
+          <view>演示账号：13800138000 / 123456</view>
+          <view>验证码会直接显示在页面中，方便你快速测试真实流程。</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="auth-footer">
+    登录后可在发现页获取定位，查看你附近的球房与陪玩。
+  </view>
+</view>

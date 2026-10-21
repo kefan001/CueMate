@@ -1,0 +1,299 @@
+page {
+  background-color: #09090b;
+  color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+view, text, scroll-view, input, textarea, button, image {
+  box-sizing: border-box;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  line-height: inherit;
+  color: inherit;
+}
+
+button::after {
+  border: none;
+}
+
+.page-shell {
+  min-height: 100vh;
+  background-color: #09090b;
+  color: #fafafa;
+  padding-bottom: 160rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  padding: 28rpx 40rpx 24rpx;
+  background: rgba(9, 9, 11, 0.96);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5rpx;
+}
+
+.page-subtitle {
+  font-size: 24rpx;
+  color: #71717a;
+  margin-top: 8rpx;
+}
+
+.page-body {
+  padding: 24rpx 40rpx 40rpx;
+  flex: 1;
+}
+
+/* Cards */
+.card {
+  background-color: rgba(24, 24, 27, 0.65);
+  border: 2rpx solid rgba(39, 39, 42, 0.75);
+  border-radius: 32rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.card-inner {
+  background-color: rgba(9, 9, 11, 0.75);
+  border: 2rpx solid #27272a;
+  border-radius: 24rpx;
+  padding: 20rpx 24rpx;
+}
+
+/* Tabs */
+.tabs-scroll {
+  white-space: nowrap;
+  width: 100%;
+  margin-top: 24rpx;
+}
+
+.tabs-row {
+  display: inline-flex;
+  gap: 40rpx;
+  padding-bottom: 12rpx;
+}
+
+.tab-item {
+  position: relative;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #71717a;
+  padding-bottom: 14rpx;
+  display: inline-block;
+}
+
+.tab-item-active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tab-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6rpx;
+  border-radius: 999rpx;
+  background-color: #10b981;
+}
+
+/* Badges & Pills */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  border: 2rpx solid #27272a;
+  background-color: #18181b;
+  color: #a1a1aa;
+}
+
+.pill-active {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  background-color: #27272a;
+  color: #d4d4d8;
+  font-size: 20rpx;
+  border-radius: 12rpx;
+  margin-right: 12rpx;
+  margin-bottom: 10rpx;
+}
+
+/* Status Tones */
+.tone-gold {
+  color: #facc15;
+  background-color: rgba(250, 204, 21, 0.12);
+}
+.tone-blue {
+  color: #60a5fa;
+  background-color: rgba(96, 165, 250, 0.12);
+}
+.tone-billiards {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.12);
+}
+.tone-indigo {
+  color: #a5b4fc;
+  background-color: rgba(129, 140, 248, 0.12);
+}
+.tone-zinc {
+  color: #a1a1aa;
+  background-color: rgba(161, 161, 170, 0.12);
+}
+.tone-red {
+  color: #f87171;
+  background-color: rgba(248, 113, 113, 0.12);
+}
+.tone-emerald {
+  color: #6ee7b7;
+  background-color: rgba(52, 211, 153, 0.12);
+}
+.tone-orange {
+  color: #fdba74;
+  background-color: rgba(251, 146, 60, 0.12);
+}
+.tone-rose {
+  color: #fda4af;
+  background-color: rgba(251, 113, 133, 0.12);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #059669;
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 24rpx 36rpx;
+  border-radius: 28rpx;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary {
+  background-color: #18181b;
+  border: 2rpx solid #27272a;
+  color: #e4e4e7;
+  font-size: 28rpx;
+  font-weight: 500;
+  padding: 24rpx 36rpx;
+  border-radius: 28rpx;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-sm-primary {
+  background-color: #059669;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+}
+
+.btn-sm-outline {
+  border: 2rpx solid #3f3f46;
+  color: #d4d4d8;
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background-color: transparent;
+}
+
+.btn-sm-danger {
+  border: 2rpx solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background-color: rgba(239, 68, 68, 0.08);
+}
+
+.btn-sm-warning {
+  border: 2rpx solid rgba(249, 115, 22, 0.4);
+  color: #fed7aa;
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background-color: rgba(249, 115, 22, 0.08);
+}
+
+/* Inputs */
+.input-box {
+  background-color: #18181b;
+  border: 2rpx solid #27272a;
+  border-radius: 28rpx;
+  padding: 22rpx 28rpx;
+  color: #ffffff;
+  font-size: 28rpx;
+  width: 100%;
+}
+
+.textarea-box {
+  background-color: #18181b;
+  border: 2rpx solid #27272a;
+  border-radius: 28rpx;
+  padding: 22rpx 28rpx;
+  color: #ffffff;
+  font-size: 28rpx;
+  width: 100%;
+  min-height: 160rpx;
+}
+
+/* Flex Utilities */
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.row-center {
+  display: flex;
+  align-items: center;
+}
+
+.text-gold {
+  color: #facc15;
+}
+
+.text-billiards {
+  color: #34d399;
+}
+
+.text-muted {
+  color: #71717a;
+}
+
+.empty-box {
+  text-align: center;
+  color: #71717a;
+  padding: 120rpx 40rpx;
+  font-size: 28rpx;
+}

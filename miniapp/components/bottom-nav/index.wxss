@@ -1,0 +1,41 @@
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(9, 9, 11, 0.94);
+  border-top: 2rpx solid rgba(39, 39, 42, 0.7);
+  padding: 12rpx 32rpx calc(16rpx + env(safe-area-inset-bottom));
+  z-index: 40;
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 96rpx;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  color: #71717a;
+  flex: 1;
+}
+
+.nav-item-active {
+  color: #10b981;
+}
+
+.nav-icon {
+  font-size: 34rpx;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 20rpx;
+  font-weight: 500;
+}

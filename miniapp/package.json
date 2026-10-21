@@ -1,0 +1,9 @@
+{
+  "name": "cuemate-miniapp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CueMate 微信小程序端（与 web 端共享 shared/cuemate-core 核心业务层）",
+  "scripts": {
+    "sync": "node ../scripts/sync-shared.mjs"
+  }
+}

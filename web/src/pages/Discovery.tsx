@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Search, MapPin, Filter, Star, X, SlidersHorizontal, LocateFixed } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { companions } from '../data/mock';
+import { DISCOVERY_TABS, filterAndSortCompanions } from '../../../shared/cuemate-core';
 import BottomNav from '../components/BottomNav';
 import Modal from '../components/Modal';
 import { useUser } from '../context/UserContext';
@@ -10,50 +11,17 @@ import { useUser } from '../context/UserContext';
 export default function Discovery() {
   const { user, requestLocation } = useUser();
   const [activeTab, setActiveTab] = useState('推荐');
-  const tabs = ['推荐', '附近', '斯诺克', '中式八球', '高颜值', '助教'];
+  const tabs = DISCOVERY_TABS;
   const [openSearch, setOpenSearch] = useState(false);
   const [openFilter, setOpenFilter] = useState(false);
   const [query, setQuery] = useState('');
   const [priceMax, setPriceMax] = useState(500);
   const [sort, setSort] = useState<'smart' | 'price_low' | 'rating_high'>('smart');
 
-  const list = useMemo(() => {
-    const parseDistance = (d: string) => {
-      const n = Number(String(d).replace(/[^0-9.]/g, ''));
-      return Number.isFinite(n) ? n : 999;
-    };
-
-    const q = query.trim().toLowerCase();
-    let data = companions.slice();
-
-    if (activeTab === '附近') {
-      data.sort((a, b) => parseDistance(a.distance) - parseDistance(b.distance));
-    } else if (activeTab !== '推荐') {
-      data = data.filter(c => {
-        const hay = `${c.name} ${c.level} ${c.tags.join(' ')}`.toLowerCase();
-        return hay.includes(activeTab.toLowerCase());
-      });
-    }
-
-    data = data.filter(c => c.hourlyRate <= priceMax);
-
-    if (q) {
-      data = data.filter(c => {
-        const hay = `${c.name} ${c.level} ${c.tags.join(' ')}`.toLowerCase();
-        return hay.includes(q);
-      });
-    }
-
-    if (sort === 'price_low') {
-      data.sort((a, b) => a.hourlyRate - b.hourlyRate);
-    } else if (sort === 'rating_high') {
-      data.sort((a, b) => b.rating - a.rating);
-    } else if (activeTab === '推荐') {
-      data.sort((a, b) => b.rating * 10 + b.reviewCount - (a.rating * 10 + a.reviewCount));
-    }
-
-    return data;
-  }, [activeTab, priceMax, query, sort]);
+  const list = useMemo(
+    () => filterAndSortCompanions(companions, { activeTab, priceMax, query, sort }),
+    [activeTab, priceMax, query, sort]
+  );
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">

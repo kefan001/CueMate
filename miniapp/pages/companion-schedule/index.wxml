@@ -1,0 +1,24 @@
+<view class="page-shell">
+  <view class="page-header">
+    <view class="page-title">我的日程</view>
+    <view class="page-subtitle">📅 近期待预约与服务时间一览</view>
+  </view>
+
+  <view class="page-body">
+    <view wx:if="{{scheduleOrders.length === 0}}" class="empty-box">
+      暂无安排，可以安心挂单接活～
+    </view>
+
+    <view wx:for="{{scheduleOrders}}" wx:key="id" class="card">
+      <view class="row-between" style="margin-bottom:14rpx;">
+        <text class="sched-time">{{item.timeText}}</text>
+        <view class="status-badge tone-{{item.statusMeta.tone}}">{{item.statusMeta.label}}</view>
+      </view>
+
+      <view wx:if="{{item.venueName}}" class="sched-venue">📍 {{item.venueName}}</view>
+      <view wx:if="{{item.note}}" class="sched-note">备注：{{item.note}}</view>
+    </view>
+  </view>
+
+  <bottom-nav active="companion-schedule" />
+</view>

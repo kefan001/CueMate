@@ -1,0 +1,60 @@
+<view class="page-shell">
+  <view class="page-header">
+    <view class="row-between">
+      <view>
+        <view class="page-title">接单台</view>
+        <view class="page-subtitle">{{me ? me.name + ' · ' + me.level : '陪玩端（演示）'}}</view>
+      </view>
+      <view class="today-box">
+        <view class="today-label">今日待服务</view>
+        <view class="today-val">{{todayCount}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="page-body">
+    <view class="stat-grid">
+      <view class="card stat-card" bindtap="goCompanionOrders">
+        <view class="stat-head">🕒 待服务</view>
+        <view class="stat-num">{{incomingCount}}</view>
+      </view>
+      <view class="card stat-card" bindtap="goCompanionOrders">
+        <view class="stat-head">🏆 服务中</view>
+        <view class="stat-num">{{activeCount}}</view>
+      </view>
+      <view class="card stat-card" bindtap="goCompanionOrders">
+        <view class="stat-head">✓ 已完成</view>
+        <view class="stat-num">{{completedCount}}</view>
+      </view>
+    </view>
+
+    <view class="row-between list-head">
+      <text class="list-title">待服务订单</text>
+      <text class="list-sub" bindtap="goCompanionOrders">查看全部接单 ›</text>
+    </view>
+
+    <view wx:if="{{incomingOrders.length === 0}}" class="empty-box">
+      暂无新订单
+    </view>
+
+    <view wx:for="{{incomingOrders}}" wx:key="id" class="card">
+      <view class="row-between" style="margin-bottom:14rpx;">
+        <text class="order-id">{{item.id}}</text>
+        <view class="status-badge tone-{{item.statusMeta.tone}}">{{item.statusMeta.label}}</view>
+      </view>
+
+      <view class="cust-name">{{item.customerName || '用户'}}</view>
+      <view class="cust-time">{{item.timeText}}</view>
+
+      <view class="row-between" style="margin-top:28rpx;">
+        <view class="cust-price">¥{{item.totalPrice}}</view>
+        <view class="cust-actions">
+          <view class="chat-btn" data-id="{{item.id}}" bindtap="openChat">💬</view>
+          <view class="btn-sm-primary" data-id="{{item.id}}" bindtap="startService">开始服务</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav active="companion-dashboard" />
+</view>

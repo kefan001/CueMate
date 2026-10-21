@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的日程",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

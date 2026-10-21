@@ -4,10 +4,12 @@
   "version": "1.0.0",
   "workspaces": [
     "web",
+    "miniapp",
     "app",
     "server"
   ],
   "scripts": {
+    "sync:shared": "node scripts/sync-shared.mjs",
     "dev:web": "npm --prefix web run dev",
     "build:web": "npm --prefix web run build",
     "lint:web": "npm --prefix web run lint",

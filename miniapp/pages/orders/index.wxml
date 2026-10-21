@@ -1,0 +1,241 @@
+<view class="page-shell">
+  <view class="page-header">
+    <view class="page-title">我的订单</view>
+
+    <scroll-view scroll-x class="tabs-scroll" show-scrollbar="{{false}}">
+      <view class="tabs-row">
+        <view
+          wx:for="{{tabs}}"
+          wx:key="*this"
+          class="tab-item {{activeTab === item ? 'tab-item-active' : ''}}"
+          data-tab="{{item}}"
+          bindtap="onSelectTab"
+        >
+          <text>{{item}}</text>
+          <view wx:if="{{activeTab === item}}" class="tab-indicator"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="page-body">
+    <view wx:if="{{filteredOrders.length === 0}}" class="empty-box">
+      暂无相关订单
+    </view>
+
+    <view wx:for="{{filteredOrders}}" wx:key="id" class="card">
+      <view class="row-between order-top">
+        <text class="order-id">{{item.id}}</text>
+        <view class="status-badge tone-{{item.statusMeta.tone}}">
+          {{item.statusMeta.label}}
+        </view>
+      </view>
+
+      <view class="order-main">
+        <image class="order-avatar" src="{{item.companionAvatar}}" mode="aspectFill" />
+        <view class="order-info">
+          <view class="order-name">{{item.companionName}}</view>
+          <view class="order-time">{{item.timeText}}</view>
+          <view class="order-hours">共 {{item.timeSlots.length}} 小时</view>
+          <view wx:if="{{item.venueName}}" class="order-venue">{{item.venueName}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{item.refundText}}" class="card-inner notice-box">
+        {{item.refundText}}
+      </view>
+
+      <view wx:if="{{item.dispute}}" class="dispute-box">
+        申诉原因：{{item.dispute.reason}}
+      </view>
+
+      <view wx:if="{{item.customerReview}}" class="card-inner review-preview">
+        <view class="stars-row">
+          <text wx:for="{{item.reviewStars}}" wx:key="*this">★</text>
+        </view>
+        <view wx:if="{{item.customerReview.tags && item.customerReview.tags.length}}" class="review-tags-row">
+          <text wx:for="{{item.customerReview.tags}}" wx:for-item="tag" wx:key="*this" class="pill pill-active">{{tag}}</text>
+        </view>
+        <view class="review-text">{{item.customerReview.content}}</view>
+        <view wx:if="{{item.customerReview.followUp}}" class="followup-inline">
+          追评：{{item.customerReview.followUp.content}}
+        </view>
+      </view>
+
+      <view class="row-between order-bottom">
+        <view class="order-total">
+          <text class="total-label">合计 </text>
+          <text>¥{{item.totalPrice}}</text>
+        </view>
+
+        <view class="action-group">
+          <view
+            wx:if="{{item.status !== 'cancelled'}}"
+            class="btn-sm-outline"
+            data-id="{{item.id}}"
+            bindtap="openChat"
+          >💬 联系陪玩</view>
+
+          <block wx:if="{{item.status === 'pending_payment'}}">
+            <view class="btn-sm-outline" data-id="{{item.id}}" bindtap="onOpenCancel">取消</view>
+            <view class="btn-sm-primary" data-id="{{item.id}}" bindtap="onOpenPay">去支付</view>
+          </block>
+
+          <block wx:if="{{item.status === 'paid'}}">
+            <view class="btn-sm-outline" data-id="{{item.id}}" bindtap="onOpenCancel">申请退款</view>
+            <view class="btn-sm-outline" data-id="{{item.id}}" bindtap="onOpenCode">出示核销码 ›</view>
+            <view class="btn-sm-danger" data-id="{{item.id}}" bindtap="markCompanionNoShow">陪玩未到</view>
+          </block>
+
+          <block wx:if="{{item.status === 'in_progress'}}">
+            <view class="btn-sm-warning" data-id="{{item.id}}" bindtap="onOpenDispute">申请售后</view>
+            <view class="btn-sm-primary" data-id="{{item.id}}" bindtap="confirmServiceDone">我已结束服务</view>
+          </block>
+
+          <block wx:if="{{item.status === 'awaiting_confirmation'}}">
+            <view class="btn-sm-warning" data-id="{{item.id}}" bindtap="onOpenDispute">发起申诉</view>
+            <view class="btn-sm-primary" data-id="{{item.id}}" bindtap="confirmCompletion">确认完成</view>
+          </block>
+
+          <view
+            wx:if="{{item.status === 'completed' && !item.customerReview}}"
+            class="btn-sm-outline"
+            data-id="{{item.id}}"
+            bindtap="onOpenReview"
+          >去评价</view>
+
+          <view
+            wx:if="{{item.status === 'completed' && item.customerReview && !item.customerReview.followUp}}"
+            class="btn-sm-outline"
+            data-id="{{item.id}}"
+            bindtap="onOpenFollowUp"
+          >追加评价</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <bottom-nav active="orders" />
+
+  <!-- 确认支付 Modal -->
+  <modal-sheet open="{{!!payingOrder}}" title="确认支付" bind:close="onClosePay">
+    <view wx:if="{{payingOrder}}" class="modal-stack">
+      <view class="card-inner">
+        <view class="row-between">
+          <text class="pay-name">{{payingOrder.companionName}}</text>
+          <text class="pay-price">¥{{payingOrder.totalPrice}}</text>
+        </view>
+        <view class="pay-time">{{payingOrder.timeText}}</view>
+      </view>
+      <view class="row-between balance-row">
+        <text class="text-muted">钱包余额</text>
+        <text class="balance-val">¥{{user.balance}}</text>
+      </view>
+      <view wx:if="{{error}}" class="pay-error">{{error}}</view>
+      <view class="pay-hint">支付后可联系陪玩、到店核销，并在异常时申请退款或申诉。</view>
+      <view class="modal-btn-row">
+        <view class="btn-secondary half" bindtap="onClosePay">取消</view>
+        <view class="btn-primary half" bindtap="confirmPay">确认支付</view>
+      </view>
+    </view>
+  </modal-sheet>
+
+  <!-- 取消/退款 Modal -->
+  <modal-sheet open="{{!!cancelOrder}}" title="取消 / 退款" bind:close="onCloseCancel">
+    <view wx:if="{{cancelOrder}}" class="modal-stack">
+      <view class="modal-desc">{{cancelOrder.status === 'paid' ? '已支付订单将原路退回到钱包余额。' : '未支付订单将直接关闭。'}}</view>
+      <textarea
+        class="textarea-box"
+        value="{{cancelReason}}"
+        data-field="cancelReason"
+        bindinput="onInputField"
+      />
+      <view class="modal-btn-row">
+        <view class="btn-secondary half" bindtap="onCloseCancel">返回</view>
+        <view class="btn-danger-full half" bindtap="submitCancellation">确认提交</view>
+      </view>
+    </view>
+  </modal-sheet>
+
+  <!-- 核销码 Modal -->
+  <modal-sheet open="{{!!codeOrder}}" title="核销码" bind:close="onCloseCode">
+    <view wx:if="{{codeOrder}}" class="modal-stack">
+      <view class="pay-hint">向球房前台出示该核销码，完成验证后即可开始服务。</view>
+      <view class="card-inner code-box">
+        <view class="code-digits">{{codeOrder.codeText}}</view>
+        <view class="code-sub">{{codeOrder.id}}</view>
+      </view>
+      <view class="btn-secondary" bindtap="confirmServiceStart">我已到店，开始服务</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 服务评价 Modal -->
+  <modal-sheet open="{{!!reviewOrder}}" title="服务评价" bind:close="onCloseReview">
+    <view wx:if="{{reviewOrder}}" class="modal-stack">
+      <view class="star-picker">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star-pick-item {{item <= reviewRating ? 'star-pick-on' : ''}}"
+          data-star="{{item}}"
+          bindtap="onSetReviewRating"
+        >★</text>
+      </view>
+      <textarea
+        class="textarea-box"
+        value="{{reviewContent}}"
+        data-field="reviewContent"
+        bindinput="onInputField"
+        placeholder="聊聊这次陪练体验、专业度和到店沟通..."
+        placeholder-style="color:#52525b;"
+      />
+      <view>
+        <view class="pay-hint" style="margin-bottom:16rpx;">快捷标签</view>
+        <view class="tag-pick-wrap">
+          <view
+            wx:for="{{reviewTagItems}}"
+            wx:key="tag"
+            class="pill {{item.active ? 'pill-active' : ''}}"
+            data-tag="{{item.tag}}"
+            bindtap="onToggleReviewTag"
+          >{{item.tag}}</view>
+        </view>
+      </view>
+      <view class="anon-row" bindtap="onToggleAnonymous">
+        <view class="anon-check {{reviewAnonymous ? 'anon-check-on' : ''}}">{{reviewAnonymous ? '✓' : ''}}</view>
+        <text>匿名评价</text>
+      </view>
+      <view class="btn-primary" bindtap="submitReview">提交评价</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 追加评价 Modal -->
+  <modal-sheet open="{{!!followUpOrder}}" title="追加评价" bind:close="onCloseFollowUp">
+    <view wx:if="{{followUpOrder}}" class="modal-stack">
+      <view class="modal-desc">补充这次服务后的真实感受，方便后续用户参考。</view>
+      <textarea
+        class="textarea-box"
+        value="{{followUpContent}}"
+        data-field="followUpContent"
+        bindinput="onInputField"
+        placeholder="比如复练效果、后续沟通、是否愿意再次预约..."
+        placeholder-style="color:#52525b;"
+      />
+      <view class="btn-secondary" bindtap="submitFollowUp">提交追评</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 发起申诉 Modal -->
+  <modal-sheet open="{{!!disputeOrder}}" title="发起申诉" bind:close="onCloseDispute">
+    <view wx:if="{{disputeOrder}}" class="modal-stack">
+      <view class="modal-desc">平台会先冻结该订单，后续可根据聊天与服务记录介入处理。</view>
+      <textarea
+        class="textarea-box"
+        value="{{disputeReason}}"
+        data-field="disputeReason"
+        bindinput="onInputField"
+      />
+      <view class="btn-orange-full" bindtap="submitDispute">提交申诉</view>
+    </view>
+  </modal-sheet>
+</view>

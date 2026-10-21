@@ -1,5 +1,26 @@
 import { AlertCircle, CheckCircle2, Clock, FileWarning, RefreshCcw, TimerOff } from 'lucide-react';
-import type { Order, OrderStatus } from '../data/mock';
+import type { OrderStatus } from '../data/mock';
+import {
+  ORDER_STATUS_TEXT,
+  formatOrderTime,
+  getRefundDescription,
+  getOrderVerificationCode,
+  filterUserOrders,
+  filterCompanionOrders,
+} from '../../../shared/cuemate-core';
+
+const STATUS_ICONS: Record<OrderStatus, typeof Clock> = {
+  pending_payment: AlertCircle,
+  paid: Clock,
+  in_progress: Clock,
+  awaiting_confirmation: CheckCircle2,
+  completed: CheckCircle2,
+  cancelled: AlertCircle,
+  refunded: RefreshCcw,
+  disputed: FileWarning,
+  no_show_user: TimerOff,
+  no_show_companion: TimerOff,
+};
 
 export const ORDER_STATUS_META: Record<
   OrderStatus,
@@ -10,31 +31,22 @@ export const ORDER_STATUS_META: Record<
     icon: typeof Clock;
   }
 > = {
-  pending_payment: { label: '待支付', color: 'text-gold-400', bg: 'bg-gold-400/10', icon: AlertCircle },
-  paid: { label: '待服务', color: 'text-blue-400', bg: 'bg-blue-400/10', icon: Clock },
-  in_progress: { label: '服务中', color: 'text-billiards-400', bg: 'bg-billiards-400/10', icon: Clock },
-  awaiting_confirmation: { label: '待确认', color: 'text-indigo-300', bg: 'bg-indigo-400/10', icon: CheckCircle2 },
-  completed: { label: '已完成', color: 'text-zinc-400', bg: 'bg-zinc-400/10', icon: CheckCircle2 },
-  cancelled: { label: '已取消', color: 'text-red-400', bg: 'bg-red-400/10', icon: AlertCircle },
-  refunded: { label: '已退款', color: 'text-emerald-300', bg: 'bg-emerald-400/10', icon: RefreshCcw },
-  disputed: { label: '申诉中', color: 'text-orange-300', bg: 'bg-orange-400/10', icon: FileWarning },
-  no_show_user: { label: '用户爽约', color: 'text-rose-300', bg: 'bg-rose-400/10', icon: TimerOff },
-  no_show_companion: { label: '陪玩爽约', color: 'text-red-300', bg: 'bg-red-400/10', icon: TimerOff },
+  pending_payment: { ...ORDER_STATUS_TEXT.pending_payment, icon: STATUS_ICONS.pending_payment },
+  paid: { ...ORDER_STATUS_TEXT.paid, icon: STATUS_ICONS.paid },
+  in_progress: { ...ORDER_STATUS_TEXT.in_progress, icon: STATUS_ICONS.in_progress },
+  awaiting_confirmation: { ...ORDER_STATUS_TEXT.awaiting_confirmation, icon: STATUS_ICONS.awaiting_confirmation },
+  completed: { ...ORDER_STATUS_TEXT.completed, icon: STATUS_ICONS.completed },
+  cancelled: { ...ORDER_STATUS_TEXT.cancelled, icon: STATUS_ICONS.cancelled },
+  refunded: { ...ORDER_STATUS_TEXT.refunded, icon: STATUS_ICONS.refunded },
+  disputed: { ...ORDER_STATUS_TEXT.disputed, icon: STATUS_ICONS.disputed },
+  no_show_user: { ...ORDER_STATUS_TEXT.no_show_user, icon: STATUS_ICONS.no_show_user },
+  no_show_companion: { ...ORDER_STATUS_TEXT.no_show_companion, icon: STATUS_ICONS.no_show_companion },
 };
 
-export function formatOrderTime(order: Order) {
-  return `${order.date} · ${order.timeSlots.join(', ')}`;
-}
-
-export function getRefundDescription(order: Order) {
-  if (order.status === 'refunded') {
-    return `已退回 ¥${order.refundAmount ?? order.totalPrice}`;
-  }
-  if (order.status === 'cancelled' && order.refundAmount) {
-    return `退款处理中 ¥${order.refundAmount}`;
-  }
-  if (order.status === 'no_show_companion') {
-    return `系统将补偿 ¥${order.refundAmount ?? order.totalPrice}`;
-  }
-  return '';
-}
+export {
+  formatOrderTime,
+  getRefundDescription,
+  getOrderVerificationCode,
+  filterUserOrders,
+  filterCompanionOrders,
+};

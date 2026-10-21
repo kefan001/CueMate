@@ -4,11 +4,12 @@ import { FileWarning, ShieldAlert, Star, TimerOff } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useOrders } from '../context/OrderContext';
 import { useUser } from '../context/UserContext';
-import { ORDER_STATUS_META, formatOrderTime } from '../lib/orders';
+import { ORDER_STATUS_META, formatOrderTime, filterCompanionOrders } from '../lib/orders';
+import { COMPANION_ORDER_TABS } from '../../../shared/cuemate-core';
 import Modal from '../components/Modal';
 import { COMPANION_REVIEW_TAGS } from '../lib/reviews';
 
-const TABS = ['全部', '待服务', '服务中', '待确认', '售后', '已完成'] as const;
+const TABS = COMPANION_ORDER_TABS;
 
 export default function CompanionOrders() {
   const { user } = useUser();
@@ -35,15 +36,7 @@ export default function CompanionOrders() {
   const reviewOrder = useMemo(() => myOrders.find(order => order.id === reviewOrderId), [myOrders, reviewOrderId]);
   const followUpOrder = useMemo(() => myOrders.find(order => order.id === followUpOrderId), [myOrders, followUpOrderId]);
 
-  const filtered = myOrders.filter(order => {
-    if (activeTab === '全部') return true;
-    if (activeTab === '待服务') return ['paid', 'no_show_user', 'no_show_companion'].includes(order.status);
-    if (activeTab === '服务中') return order.status === 'in_progress';
-    if (activeTab === '待确认') return order.status === 'awaiting_confirmation';
-    if (activeTab === '售后') return ['disputed', 'refunded', 'cancelled'].includes(order.status);
-    if (activeTab === '已完成') return order.status === 'completed';
-    return true;
-  });
+  const filtered = filterCompanionOrders(orders, user.companionId, activeTab);
 
   const submitReview = () => {
     if (!reviewOrder) return;

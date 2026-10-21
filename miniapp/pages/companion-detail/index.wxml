@@ -1,0 +1,175 @@
+<view wx:if="{{companion}}" class="detail-page">
+  <view class="hero-wrap">
+    <image class="hero-img" src="{{companion.images[0] || companion.avatar}}" mode="aspectFill" />
+    <view class="hero-mask"></view>
+    <view class="hero-bottom row-between">
+      <view>
+        <view class="hero-name">{{companion.name}}</view>
+        <view class="hero-level">✓ {{companion.level}}</view>
+      </view>
+      <image class="hero-avatar" src="{{companion.avatar}}" mode="aspectFill" />
+    </view>
+  </view>
+
+  <view class="detail-content">
+    <view class="stats-bar">
+      <view class="stat-col">
+        <view class="stat-val">★ {{reviewSummary.count > 0 ? reviewSummary.average : companion.rating}}</view>
+        <view class="stat-label">{{reviewSummary.count > 0 ? reviewSummary.count : companion.reviewCount}} 条评价</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-col">
+        <view class="stat-val">¥{{companion.hourlyRate}}</view>
+        <view class="stat-label">每小时</view>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-col">
+        <view class="stat-val">📍 {{companion.distance}}</view>
+        <view class="stat-label">距离</view>
+      </view>
+    </view>
+
+    <view class="section-block">
+      <view class="section-title">关于我</view>
+      <view class="bio-text">{{companion.bio}}</view>
+      <view class="tags-row">
+        <text wx:for="{{companion.tags}}" wx:key="*this" class="tag">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="section-block">
+      <view class="row-between section-head">
+        <text class="section-title" style="margin-bottom:0;">用户评价</text>
+        <text class="section-sub">{{reviewSummary.count > 0 ? '近 ' + reviewSummary.count + ' 条真实订单评价' : '当前展示历史口碑'}}</text>
+      </view>
+
+      <view wx:if="{{reviewSummary.count > 0}}" class="card-inner summary-box">
+        <view class="summary-top">
+          <view>
+            <view class="summary-avg">{{reviewSummary.average}}</view>
+            <view class="summary-rate">好评率 {{reviewSummary.positiveRate}}%</view>
+          </view>
+          <view class="dist-list">
+            <view wx:for="{{reviewSummary.distribution}}" wx:key="star" class="dist-row">
+              <text class="dist-star">{{item.star}}星</text>
+              <view class="dist-track">
+                <view class="dist-fill" style="width: {{item.percent}}%;"></view>
+              </view>
+              <text class="dist-count">{{item.count}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{reviewSummary.topTags.length}}" class="summary-tags">
+          <text
+            wx:for="{{reviewSummary.topTags}}"
+            wx:key="tag"
+            class="pill pill-active"
+          >{{item.tag}} {{item.count}}</text>
+        </view>
+      </view>
+
+      <view class="filter-pills">
+        <view
+          class="pill {{reviewFilter === 'all' ? 'pill-active' : ''}}"
+          data-filter="all"
+          bindtap="onSelectReviewFilter"
+        >全部</view>
+        <view
+          class="pill {{reviewFilter === 'latest' ? 'pill-active' : ''}}"
+          data-filter="latest"
+          bindtap="onSelectReviewFilter"
+        >最新</view>
+        <view
+          class="pill {{reviewFilter === 'positive' ? 'pill-active' : ''}}"
+          data-filter="positive"
+          bindtap="onSelectReviewFilter"
+        >好评</view>
+        <view
+          class="pill {{reviewFilter === 'critical' ? 'pill-active' : ''}}"
+          data-filter="critical"
+          bindtap="onSelectReviewFilter"
+        >待改进</view>
+      </view>
+
+      <view wx:if="{{visibleReviews.length === 0}}" class="card-inner empty-review">
+        当前筛选下暂无评价内容。
+      </view>
+      <view wx:else class="review-list">
+        <view wx:for="{{visibleReviews}}" wx:key="orderId" class="card-inner review-card">
+          <view class="row-between">
+            <text class="review-author">{{item.displayAuthorName}}</text>
+            <view class="review-stars">
+              <text wx:for="{{item.stars}}" wx:key="*this">★</text>
+            </view>
+          </view>
+          <view class="review-date">{{item.dateText}}</view>
+          <view wx:if="{{item.tags && item.tags.length}}" class="review-tags">
+            <text wx:for="{{item.tags}}" wx:for-item="t" wx:key="*this" class="tag">{{t}}</text>
+          </view>
+          <view class="review-content">{{item.content}}</view>
+          <view wx:if="{{item.followUp}}" class="followup-box">
+            <view class="followup-label">追评</view>
+            <view class="followup-text">{{item.followUp.content}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-block">
+      <view class="row-between section-head">
+        <text class="section-title" style="margin-bottom:0;">📅 预约时间</text>
+        <text class="section-sub">ⓘ 提前2小时预约</text>
+      </view>
+
+      <scroll-view scroll-x class="date-scroll" show-scrollbar="{{false}}">
+        <view class="date-row">
+          <view
+            wx:for="{{dates}}"
+            wx:key="fullDateStr"
+            class="date-card {{selectedDate === index ? 'date-card-active' : ''}}"
+            data-index="{{index}}"
+            bindtap="onSelectDate"
+          >
+            <text class="date-day">{{item.dayStr}}</text>
+            <text class="date-num">{{item.dateStr}}</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="slot-grid">
+        <view
+          wx:for="{{currentDaySlots}}"
+          wx:key="time"
+          class="slot-item {{!item.available ? 'slot-disabled' : item.selected ? 'slot-selected' : ''}}"
+          data-time="{{item.time}}"
+          data-available="{{item.available}}"
+          bindtap="onToggleSlot"
+        >
+          <view>{{item.time}}</view>
+          <view wx:if="{{!item.available}}" class="slot-full">已满</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-bar row-between">
+    <view>
+      <view class="bar-hint">{{selectedSlots.length > 0 ? '已选 ' + selectedSlots.length + ' 小时' : '请选择时间'}}</view>
+      <view class="bar-price">
+        <text class="bar-currency">¥</text>
+        <text>{{totalPrice}}</text>
+      </view>
+    </view>
+
+    <view class="bar-actions">
+      <view class="chat-circle" bindtap="handleOpenChat">💬</view>
+      <view
+        class="book-btn {{selectedSlots.length === 0 ? 'book-btn-disabled' : ''}}"
+        bindtap="handleBook"
+      >
+        {{isBooking ? '预约中...' : '立即预约'}}
+      </view>
+    </view>
+  </view>
+</view>

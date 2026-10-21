@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "CueMate · 发现陪玩",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index",
+    "modal-sheet": "/components/modal-sheet/index"
+  }
+}

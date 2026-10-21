@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "我的",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index",
+    "modal-sheet": "/components/modal-sheet/index"
+  }
+}

@@ -1,0 +1,118 @@
+<view wx:if="{{!thread}}" class="not-found">
+  <view class="nf-title">会话不存在</view>
+  <view class="nf-desc">可能是身份切换后不再属于当前账号。</view>
+  <view class="btn-secondary nf-btn" bindtap="goBackMessages">返回消息列表</view>
+</view>
+
+<view wx:else class="chat-page">
+  <view class="chat-top-bar">
+    <image class="top-avatar" src="{{peerAvatar}}" mode="aspectFill" />
+    <view class="top-meta">
+      <view class="top-name">{{peerName}}</view>
+      <view class="top-status">演示实时模式 · 自动回复</view>
+    </view>
+  </view>
+
+  <scroll-view
+    scroll-y
+    class="chat-scroll"
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation
+  >
+    <view class="service-card">
+      <view class="row-between">
+        <view>
+          <view class="sc-title">本次服务沟通卡</view>
+          <view class="sc-time">{{scheduleText}}</view>
+        </view>
+        <text class="sc-spark">✦</text>
+      </view>
+      <view wx:if="{{thread.venueName}}" class="sc-venue">
+        📍 {{thread.venueName}}
+      </view>
+    </view>
+
+    <view class="msg-list">
+      <view
+        wx:for="{{messageItems}}"
+        wx:key="id"
+        id="msg_{{item.id}}"
+        class="msg-row {{item.isSystem ? 'msg-row-sys' : item.isMine ? 'msg-row-mine' : 'msg-row-peer'}}"
+      >
+        <view wx:if="{{item.isSystem}}" class="sys-pill">{{item.text}}</view>
+
+        <view wx:else class="msg-bubble {{item.isMine ? 'bubble-mine' : 'bubble-peer'}}">
+          <view wx:if="{{item.type === 'image'}}">
+            <image
+              class="msg-img"
+              src="{{item.mediaUrl}}"
+              mode="widthFix"
+              data-url="{{item.mediaUrl}}"
+              bindtap="onPreviewImage"
+            />
+            <view wx:if="{{item.text}}" class="img-caption">{{item.text}}</view>
+          </view>
+
+          <view
+            wx:elif="{{item.type === 'voice'}}"
+            class="voice-box"
+            data-id="{{item.id}}"
+            data-url="{{item.mediaUrl}}"
+            data-duration="{{item.durationSec}}"
+            bindtap="onPlayVoice"
+          >
+            <text class="voice-icon">{{playingMessageId === item.id ? '🔊' : '🔈'}}</text>
+            <text class="voice-label">语音消息</text>
+            <text class="voice-dur">{{item.durationSec || 0}}s</text>
+          </view>
+
+          <view wx:else class="msg-text">{{item.text}}</view>
+
+          <view class="msg-foot row-between">
+            <text>{{item.timeText}}</text>
+            <text wx:if="{{item.receiptText}}">{{item.receiptText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="chat-input-bar">
+    <scroll-view scroll-x class="quick-scroll" show-scrollbar="{{false}}">
+      <view class="quick-row">
+        <view
+          wx:for="{{quickReplies}}"
+          wx:key="*this"
+          class="pill quick-pill"
+          data-reply="{{item}}"
+          bindtap="onTapQuickReply"
+        >{{item}}</view>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{recordingHint}}" class="rec-hint">{{recordingHint}}</view>
+
+    <view class="input-controls">
+      <view class="tool-circle" bindtap="onSelectImage">🖼️</view>
+      <view
+        class="tool-circle {{isRecording ? 'tool-recording' : ''}}"
+        bindtap="onToggleRecord"
+      >{{isRecording ? '■' : '🎙️'}}</view>
+
+      <input
+        class="chat-input"
+        value="{{draft}}"
+        bindinput="onDraftInput"
+        confirm-type="send"
+        bindconfirm="onTapSend"
+        placeholder="{{currentRole === 'user' ? '先和陪玩确认打法、到店时间...' : '回复用户的时间安排或服务建议...'}}"
+        placeholder-style="color:#71717a;"
+      />
+
+      <view
+        class="send-circle {{draft ? 'send-circle-active' : ''}}"
+        bindtap="onTapSend"
+      >➤</view>
+    </view>
+  </view>
+</view>

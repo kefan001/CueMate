@@ -1,21 +1,20 @@
 import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import type { UserProfile } from '../data/mock';
 import { mockUser } from '../data/mock';
+import {
+  STORAGE_KEYS,
+  createAvatar,
+  createDefaultAccount,
+  ensureAccounts,
+  inferLocationLabel,
+  isValidPhone,
+  generateCode,
+  verifyCodeSession,
+  type RegisteredAccount,
+  type VerificationPurpose,
+  type VerificationSession,
+} from '../../../shared/cuemate-core';
 import { readJson, writeJson } from '../utils/storage';
-
-type VerificationPurpose = 'login' | 'register' | 'reset_password';
-
-interface RegisteredAccount {
-  id: string;
-  name: string;
-  phone: string;
-  password: string;
-  avatar: string;
-  bio?: string;
-  gender?: UserProfile['gender'];
-  createdAt: string;
-  lastLoginAt?: string;
-}
 
 interface AuthResult {
   ok: boolean;
@@ -25,13 +24,6 @@ interface AuthResult {
 interface VerificationResult extends AuthResult {
   demoCode?: string;
   expiresAt?: string;
-}
-
-interface VerificationSession {
-  code: string;
-  purpose: VerificationPurpose;
-  expiresAt: string;
-  sentAt: string;
 }
 
 interface UserContextValue {
@@ -54,70 +46,14 @@ interface UserContextValue {
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
-const STORAGE_KEY = 'cuemate.user.v3';
-const ACCOUNT_STORAGE_KEY = 'cuemate.accounts.v2';
-const VERIFICATION_STORAGE_KEY = 'cuemate.verification.v1';
-
-function createAvatar(seed: string) {
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/200/200`;
-}
-
-function createDefaultAccount(): RegisteredAccount {
-  return {
-    id: mockUser.id,
-    name: mockUser.name,
-    phone: mockUser.phone,
-    password: '123456',
-    avatar: mockUser.avatar,
-    bio: mockUser.bio,
-    gender: mockUser.gender,
-    createdAt: new Date().toISOString(),
-  };
-}
+const STORAGE_KEY = STORAGE_KEYS.USER;
+const ACCOUNT_STORAGE_KEY = STORAGE_KEYS.ACCOUNTS;
+const VERIFICATION_STORAGE_KEY = STORAGE_KEYS.VERIFICATIONS;
 
 function readAccounts() {
   const fallback = [createDefaultAccount()];
   const accounts = readJson<RegisteredAccount[]>(ACCOUNT_STORAGE_KEY, fallback);
-  if (!accounts.some(account => account.phone === mockUser.phone)) {
-    return [...accounts, fallback[0]];
-  }
-  return accounts;
-}
-
-function inferLocationLabel(latitude: number, longitude: number) {
-  if (latitude > 39 && latitude < 41 && longitude > 115 && longitude < 118) {
-    return {
-      city: '北京市朝阳区',
-      label: '北京市朝阳区 · 已获取附近定位',
-    };
-  }
-
-  if (latitude > 30 && latitude < 32 && longitude > 120 && longitude < 122) {
-    return {
-      city: '上海市浦东新区',
-      label: '上海市浦东新区 · 已获取附近定位',
-    };
-  }
-
-  if (latitude > 22 && latitude < 24 && longitude > 112 && longitude < 115) {
-    return {
-      city: '广州市天河区',
-      label: '广州市天河区 · 已获取附近定位',
-    };
-  }
-
-  return {
-    city: '已获取当前位置',
-    label: `纬度 ${latitude.toFixed(3)} / 经度 ${longitude.toFixed(3)}`,
-  };
-}
-
-function isValidPhone(phone: string) {
-  return /^1\d{10}$/.test(phone.trim());
-}
-
-function generateCode() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return ensureAccounts(accounts);
 }
 
 export function UserProvider({ children }: PropsWithChildren) {
@@ -246,14 +182,8 @@ export function UserProvider({ children }: PropsWithChildren) {
     };
   };
 
-  const verifyCode = (phone: string, code: string, purpose: VerificationPurpose) => {
-    const session = verifications[phone.trim()];
-    if (!session) return { ok: false, message: '请先获取验证码' };
-    if (session.purpose !== purpose) return { ok: false, message: '验证码用途不匹配，请重新获取' };
-    if (new Date(session.expiresAt).getTime() < Date.now()) return { ok: false, message: '验证码已过期，请重新获取' };
-    if (session.code !== code.trim()) return { ok: false, message: '验证码不正确' };
-    return { ok: true };
-  };
+  const verifyCode = (phone: string, code: string, purpose: VerificationPurpose) =>
+    verifyCodeSession(verifications, phone, code, purpose);
 
   const login: UserContextValue['login'] = ({ phone, password }) => {
     const normalizedPhone = phone.trim();

@@ -9,6 +9,14 @@ import {
 } from 'react';
 import type { ChatMessage, ChatThread } from '../data/mock';
 import { mockChatThreads } from '../data/mock';
+import {
+  STORAGE_KEYS,
+  createThreadId,
+  createMessageId,
+  upsertThread,
+  updateThread,
+  replyTextFor,
+} from '../../../shared/cuemate-core';
 import { createChatRealtimeClient } from '../lib/chatRealtime';
 import { readJson, writeJson } from '../utils/storage';
 
@@ -43,59 +51,9 @@ interface ChatContextValue {
 }
 
 const ChatContext = createContext<ChatContextValue | undefined>(undefined);
-const STORAGE_KEY = 'cuemate.chat.v2';
+const STORAGE_KEY = STORAGE_KEYS.CHAT;
 
-const createThreadId = (companionId: string, customerId: string) => `thread_${companionId}_${customerId}`;
 const realtime = createChatRealtimeClient();
-
-function createMessageId(threadId: string) {
-  return `${threadId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-}
-
-function sortThreads(threads: ChatThread[]) {
-  return threads
-    .slice()
-    .sort((a, b) => {
-      const aTime = a.messages[a.messages.length - 1]?.createdAt ?? '';
-      const bTime = b.messages[b.messages.length - 1]?.createdAt ?? '';
-      return bTime.localeCompare(aTime);
-    });
-}
-
-function upsertThread(prev: ChatThread[], thread: ChatThread) {
-  const exists = prev.some(item => item.id === thread.id);
-  return sortThreads(exists ? prev.map(item => (item.id === thread.id ? thread : item)) : [thread, ...prev]);
-}
-
-function updateThread(prev: ChatThread[], threadId: string, updater: (thread: ChatThread) => ChatThread) {
-  return sortThreads(prev.map(thread => (thread.id === threadId ? updater(thread) : thread)));
-}
-
-function replyTextFor(thread: ChatThread, message: SendMessageInput) {
-  const text = message.text?.trim() ?? '';
-
-  if (message.type === 'image') {
-    return message.sender === 'user' ? '我看到了图片，现场我可以按这个状态帮你调整。' : '收到图片啦，我大概明白这次想练的内容了。';
-  }
-
-  if (message.type === 'voice') {
-    return message.sender === 'user' ? '语音我收到了，重点我记下了，到店后我们直接开练。' : '我听完语音了，等你到店我们直接按这个思路来。';
-  }
-
-  if (/几点|时间|到店/.test(text)) {
-    return '按当前预约时间到店就可以，提前 10 分钟会更从容。';
-  }
-  if (/走位|发力|准度|翻袋|防守/.test(text)) {
-    return '明白，这部分我会优先带你练，先热手再针对性拆动作。';
-  }
-  if (/谢谢|辛苦|收到/.test(text)) {
-    return '没事，我们到时见，有变动随时在这里说。';
-  }
-
-  return message.sender === 'user'
-    ? `收到，你这次的需求我已经记下了，${thread.appointmentDate ?? '到店'}我们直接衔接。`
-    : '好的，有任何变动你直接在这里找我就行。';
-}
 
 export function ChatProvider({ children }: PropsWithChildren) {
   const [threads, setThreads] = useState<ChatThread[]>(() => readJson<ChatThread[]>(STORAGE_KEY, mockChatThreads));
