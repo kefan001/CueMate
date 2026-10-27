@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "聊天消息",
   "usingComponents": {
-    "bottom-nav": "/components/bottom-nav/index"
+    "bottom-nav": "/components/bottom-nav/index",
+    "ui-icon": "/components/ui-icon/index"
   }
 }

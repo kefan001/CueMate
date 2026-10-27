@@ -2,7 +2,8 @@
   <view>
     <view class="auth-hero">
       <view class="auth-badge">
-        <text>📍 登录后即可开启附近陪玩、定位和订单履约功能</text>
+        <ui-icon name="map-pin" size="26" color="#6ee7b7" />
+        <text style="margin-left: 10rpx;">登录后即可开启附近陪玩、定位和订单履约功能</text>
       </view>
       <view class="auth-brand">CueMate</view>
       <view class="auth-sub">这次把登录、验证码和找回密码也做顺了。</view>

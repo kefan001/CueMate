@@ -10,13 +10,17 @@
           {{connectionState === 'connected' ? 'WebSocket 实时在线' : '演示实时模式（智能自动回复）'}}
         </view>
       </view>
-      <view class="msg-badge-icon">💬</view>
+      <view class="msg-badge-icon">
+        <ui-icon name="message-circle" size="36" color="#34d399" />
+      </view>
     </view>
   </view>
 
   <view class="page-body">
     <view wx:if="{{threadCards.length === 0}}" class="empty-chat">
-      <view class="empty-circle">💬</view>
+      <view class="empty-circle">
+        <ui-icon name="message-circle" size="48" color="#71717a" />
+      </view>
       <view class="empty-title">还没有聊天会话</view>
       <view class="empty-desc">从陪玩详情页点击“先聊聊”后，消息会出现在这里。</view>
     </view>
@@ -40,13 +44,13 @@
               <view class="peer-name">{{item.peerName}}</view>
               <view class="msg-time">{{item.timeText}}</view>
             </view>
-            <text class="arrow-right">›</text>
+            <ui-icon name="chevron-right" size="32" color="#52525b" />
           </view>
 
           <view class="msg-preview">{{item.preview}}</view>
 
           <view wx:if="{{item.scheduleLabel}}" class="schedule-pill">
-            <text class="schedule-icon">🕒</text>
+            <ui-icon name="clock" size="24" color="#34d399" />
             <text class="schedule-text">{{item.scheduleLabel}}</text>
           </view>
         </view>

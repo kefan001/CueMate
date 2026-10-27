@@ -7,7 +7,7 @@
         data-url="/pages/discovery/index"
         bindtap="onNavigate"
       >
-        <text class="nav-icon">◎</text>
+        <ui-icon name="compass" size="42" color="{{active === 'discovery' ? '#10b981' : '#71717a'}}" />
         <text class="nav-label">发现</text>
       </view>
     </block>
@@ -18,7 +18,7 @@
         data-url="/pages/companion-dashboard/index"
         bindtap="onNavigate"
       >
-        <text class="nav-icon">◈</text>
+        <ui-icon name="hand-coins" size="42" color="{{active === 'companion-dashboard' ? '#10b981' : '#71717a'}}" />
         <text class="nav-label">接单台</text>
       </view>
     </block>
@@ -29,7 +29,7 @@
       data-url="/pages/messages/index"
       bindtap="onNavigate"
     >
-      <text class="nav-icon">💬</text>
+      <ui-icon name="message-circle" size="42" color="{{active === 'messages' ? '#10b981' : '#71717a'}}" />
       <text class="nav-label">聊天</text>
     </view>
 
@@ -40,7 +40,7 @@
         data-url="/pages/orders/index"
         bindtap="onNavigate"
       >
-        <text class="nav-icon">▤</text>
+        <ui-icon name="file-text" size="42" color="{{active === 'orders' ? '#10b981' : '#71717a'}}" />
         <text class="nav-label">订单</text>
       </view>
     </block>
@@ -51,7 +51,7 @@
         data-url="/pages/companion-orders/index"
         bindtap="onNavigate"
       >
-        <text class="nav-icon">▤</text>
+        <ui-icon name="file-text" size="42" color="{{active === 'companion-orders' ? '#10b981' : '#71717a'}}" />
         <text class="nav-label">接单</text>
       </view>
       <view
@@ -60,7 +60,7 @@
         data-url="/pages/companion-schedule/index"
         bindtap="onNavigate"
       >
-        <text class="nav-icon">📅</text>
+        <ui-icon name="calendar" size="42" color="{{active === 'companion-schedule' ? '#10b981' : '#71717a'}}" />
         <text class="nav-label">日程</text>
       </view>
     </block>
@@ -71,7 +71,7 @@
       data-url="/pages/profile/index"
       bindtap="onNavigate"
     >
-      <text class="nav-icon">●</text>
+      <ui-icon name="user" size="42" color="{{active === 'profile' ? '#10b981' : '#71717a'}}" />
       <text class="nav-label">我的</text>
     </view>
   </view>

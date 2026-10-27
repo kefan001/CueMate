@@ -2,6 +2,7 @@
   "navigationBarTitleText": "我的",
   "usingComponents": {
     "bottom-nav": "/components/bottom-nav/index",
-    "modal-sheet": "/components/modal-sheet/index"
+    "modal-sheet": "/components/modal-sheet/index",
+    "ui-icon": "/components/ui-icon/index"
   }
 }

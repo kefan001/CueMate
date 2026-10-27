@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "登录 CueMate"
+  "navigationBarTitleText": "登录 CueMate",
+  "usingComponents": {
+    "ui-icon": "/components/ui-icon/index"
+  }
 }

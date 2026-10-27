@@ -1,7 +1,10 @@
 <view class="page-shell">
   <view class="page-header">
     <view class="page-title">我的日程</view>
-    <view class="page-subtitle">📅 近期待预约与服务时间一览</view>
+    <view class="page-subtitle" style="display:flex;align-items:center;gap:8rpx;">
+      <ui-icon name="calendar" size="24" color="#71717a" />
+      <text>近期待预约与服务时间一览</text>
+    </view>
   </view>
 
   <view class="page-body">
@@ -15,7 +18,10 @@
         <view class="status-badge tone-{{item.statusMeta.tone}}">{{item.statusMeta.label}}</view>
       </view>
 
-      <view wx:if="{{item.venueName}}" class="sched-venue">📍 {{item.venueName}}</view>
+      <view wx:if="{{item.venueName}}" class="sched-venue" style="display:flex;align-items:center;gap:8rpx;">
+        <ui-icon name="map-pin" size="24" color="#a1a1aa" />
+        <text>{{item.venueName}}</text>
+      </view>
       <view wx:if="{{item.note}}" class="sched-note">备注：{{item.note}}</view>
     </view>
   </view>

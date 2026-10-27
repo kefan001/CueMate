@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "会话详情"
+  "navigationBarTitleText": "会话详情",
+  "usingComponents": {
+    "ui-icon": "/components/ui-icon/index"
+  }
 }

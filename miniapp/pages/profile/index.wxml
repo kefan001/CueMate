@@ -5,7 +5,9 @@
     <view class="profile-hero">
       <view class="avatar-box">
         <image class="user-avatar" src="{{user.avatar}}" mode="aspectFill" />
-        <view class="verify-dot">✓</view>
+        <view class="verify-dot">
+          <ui-icon name="check" size="22" color="#000000" />
+        </view>
       </view>
 
       <view class="user-meta">
@@ -16,14 +18,19 @@
         <view class="role-tag">{{user.role === 'user' ? '普通用户' : '陪玩身份'}}</view>
       </view>
 
-      <view class="gear-btn" bindtap="onOpenEdit">⚙</view>
+      <view class="gear-btn" bindtap="onOpenEdit">
+        <ui-icon name="settings" size="34" color="#a1a1aa" />
+      </view>
     </view>
   </view>
 
   <view class="page-body">
     <view class="wallet-grid">
       <view class="card wallet-card" bindtap="onOpenWallet">
-        <view class="w-head">💳 钱包余额</view>
+        <view class="w-head" style="display:flex;align-items:center;gap:8rpx;">
+          <ui-icon name="wallet" size="26" color="#71717a" />
+          <text>钱包余额</text>
+        </view>
         <view class="w-val">
           <text class="w-unit">¥</text>
           <text>{{balanceFixed}}</text>
@@ -31,7 +38,10 @@
       </view>
 
       <view class="card wallet-card">
-        <view class="w-head">🎟 优惠券</view>
+        <view class="w-head" style="display:flex;align-items:center;gap:8rpx;">
+          <ui-icon name="ticket" size="26" color="#71717a" />
+          <text>优惠券</text>
+        </view>
         <view class="w-val">
           <text>{{user.coupons}}</text>
           <text class="w-unit"> 张</text>
@@ -42,12 +52,15 @@
     <view class="card">
       <view class="row-between">
         <view>
-          <view class="loc-head">📍 当前位置</view>
+          <view class="loc-head" style="display:flex;align-items:center;gap:8rpx;">
+            <ui-icon name="map-pin" size="26" color="#71717a" />
+            <text>当前位置</text>
+          </view>
           <view class="loc-main">{{user.locationCity || '未开启定位'}}</view>
           <view class="loc-sub">{{user.locationLabel}}</view>
         </view>
         <view class="loc-btn {{user.locationStatus === 'granted' ? 'loc-btn-on' : ''}}" bindtap="onRequestLocation">
-          ⊕
+          <ui-icon name="locate-fixed" size="34" color="{{user.locationStatus === 'granted' ? '#10b981' : '#d4d4d8'}}" />
         </view>
       </view>
     </view>
@@ -55,7 +68,10 @@
     <view class="card">
       <view class="row-between">
         <view>
-          <view class="loc-head">★ {{reviewTitle}}</view>
+          <view class="loc-head" style="display:flex;align-items:center;gap:8rpx;">
+            <ui-icon name="star-fill" size="26" color="#eab308" />
+            <text>{{reviewTitle}}</text>
+          </view>
           <view class="loc-sub">{{reviewHint}}</view>
         </view>
         <view style="text-align:right;">
@@ -75,8 +91,8 @@
         <view wx:for="{{receivedReviews}}" wx:key="orderId" class="card-inner rep-item">
           <view class="row-between">
             <text class="rep-author">{{item.displayAuthorName}}</text>
-            <view class="rep-stars">
-              <text wx:for="{{item.stars}}" wx:key="*this">★</text>
+            <view class="rep-stars" style="display:flex;align-items:center;gap:4rpx;">
+              <ui-icon wx:for="{{item.stars}}" wx:key="*this" name="star-fill" size="22" color="#eab308" />
             </view>
           </view>
           <view wx:if="{{item.tags && item.tags.length}}" class="rep-tags">
@@ -90,37 +106,45 @@
     <view class="card menu-card">
       <view class="menu-item" bindtap="onOpenRole">
         <view class="menu-left">
-          <view class="menu-icon icon-green">🛡</view>
+          <view class="menu-icon icon-green">
+            <ui-icon name="shield-check" size="34" color="#34d399" />
+          </view>
           <view>
             <view class="menu-title">切换身份（演示）</view>
             <view class="menu-sub">当前：{{user.role === 'user' ? '用户端' : '陪玩端'}}</view>
           </view>
         </view>
-        <text class="menu-arrow">›</text>
+        <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
       <view class="menu-item" bindtap="onOpenEdit">
         <view class="menu-left">
-          <view class="menu-icon">✎</view>
+          <view class="menu-icon">
+            <ui-icon name="pencil" size="32" color="#a1a1aa" />
+          </view>
           <view>
             <view class="menu-title">编辑资料</view>
             <view class="menu-sub">昵称、简介、性别偏好</view>
           </view>
         </view>
-        <text class="menu-arrow">›</text>
+        <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
       <view class="menu-item" data-tip="可在「切换身份」中直接体验陪玩端工作台" bindtap="onMenuTip">
         <view class="menu-left">
-          <view class="menu-icon icon-gold">★</view>
+          <view class="menu-icon icon-gold">
+            <ui-icon name="star" size="34" color="#facc15" />
+          </view>
           <view class="menu-title">成为陪玩 / 达人认证</view>
         </view>
-        <text class="menu-arrow">›</text>
+        <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
       <view class="menu-item" data-tip="已支持手机号验证码登录与找回密码" bindtap="onMenuTip">
         <view class="menu-left">
-          <view class="menu-icon icon-green">📱</view>
+          <view class="menu-icon icon-green">
+            <ui-icon name="smartphone" size="34" color="#34d399" />
+          </view>
           <view>
             <view class="menu-title">账号安全</view>
             <view class="menu-sub">支持验证码登录与找回密码</view>
@@ -131,18 +155,22 @@
 
       <view class="menu-item" data-tip="客服热线：400-800-8899（演示）" bindtap="onMenuTip">
         <view class="menu-left">
-          <view class="menu-icon">❓</view>
+          <view class="menu-icon">
+            <ui-icon name="help-circle" size="34" color="#a1a1aa" />
+          </view>
           <view class="menu-title">帮助中心与客服</view>
         </view>
-        <text class="menu-arrow">›</text>
+        <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
       <view class="menu-item menu-item-last" data-tip="当前版本：v1.0.0 小程序版" bindtap="onMenuTip">
         <view class="menu-left">
-          <view class="menu-icon">⚙</view>
+          <view class="menu-icon">
+            <ui-icon name="settings" size="34" color="#a1a1aa" />
+          </view>
           <view class="menu-title">通用设置</view>
         </view>
-        <text class="menu-arrow">›</text>
+        <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
     </view>
 

@@ -15,15 +15,24 @@
   <view class="page-body">
     <view class="stat-grid">
       <view class="card stat-card" bindtap="goCompanionOrders">
-        <view class="stat-head">🕒 待服务</view>
+        <view class="stat-head" style="display:flex;align-items:center;gap:8rpx;">
+          <ui-icon name="clock" size="24" color="#71717a" />
+          <text>待服务</text>
+        </view>
         <view class="stat-num">{{incomingCount}}</view>
       </view>
       <view class="card stat-card" bindtap="goCompanionOrders">
-        <view class="stat-head">🏆 服务中</view>
+        <view class="stat-head" style="display:flex;align-items:center;gap:8rpx;">
+          <ui-icon name="trophy" size="24" color="#71717a" />
+          <text>服务中</text>
+        </view>
         <view class="stat-num">{{activeCount}}</view>
       </view>
       <view class="card stat-card" bindtap="goCompanionOrders">
-        <view class="stat-head">✓ 已完成</view>
+        <view class="stat-head" style="display:flex;align-items:center;gap:8rpx;">
+          <ui-icon name="check-circle" size="24" color="#71717a" />
+          <text>已完成</text>
+        </view>
         <view class="stat-num">{{completedCount}}</view>
       </view>
     </view>
@@ -49,7 +58,9 @@
       <view class="row-between" style="margin-top:28rpx;">
         <view class="cust-price">¥{{item.totalPrice}}</view>
         <view class="cust-actions">
-          <view class="chat-btn" data-id="{{item.id}}" bindtap="openChat">💬</view>
+          <view class="chat-btn" data-id="{{item.id}}" bindtap="openChat">
+            <ui-icon name="message-circle" size="30" color="#d4d4d8" />
+          </view>
           <view class="btn-sm-primary" data-id="{{item.id}}" bindtap="startService">开始服务</view>
         </view>
       </view>

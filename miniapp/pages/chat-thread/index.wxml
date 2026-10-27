@@ -25,10 +25,11 @@
           <view class="sc-title">本次服务沟通卡</view>
           <view class="sc-time">{{scheduleText}}</view>
         </view>
-        <text class="sc-spark">✦</text>
+        <ui-icon name="sparkles" size="32" color="#facc15" />
       </view>
-      <view wx:if="{{thread.venueName}}" class="sc-venue">
-        📍 {{thread.venueName}}
+      <view wx:if="{{thread.venueName}}" class="sc-venue" style="display:flex;align-items:center;gap:8rpx;">
+        <ui-icon name="map-pin" size="26" color="#34d399" />
+        <text>{{thread.venueName}}</text>
       </view>
     </view>
 
@@ -61,7 +62,7 @@
             data-duration="{{item.durationSec}}"
             bindtap="onPlayVoice"
           >
-            <text class="voice-icon">{{playingMessageId === item.id ? '🔊' : '🔈'}}</text>
+            <ui-icon name="volume-2" size="30" color="{{playingMessageId === item.id ? '#ffffff' : '#d4d4d8'}}" />
             <text class="voice-label">语音消息</text>
             <text class="voice-dur">{{item.durationSec || 0}}s</text>
           </view>
@@ -93,11 +94,15 @@
     <view wx:if="{{recordingHint}}" class="rec-hint">{{recordingHint}}</view>
 
     <view class="input-controls">
-      <view class="tool-circle" bindtap="onSelectImage">🖼️</view>
+      <view class="tool-circle" bindtap="onSelectImage">
+        <ui-icon name="image-plus" size="36" color="#d4d4d8" />
+      </view>
       <view
         class="tool-circle {{isRecording ? 'tool-recording' : ''}}"
         bindtap="onToggleRecord"
-      >{{isRecording ? '■' : '🎙️'}}</view>
+      >
+        <ui-icon name="{{isRecording ? 'square-fill' : 'mic'}}" size="34" color="{{isRecording ? '#fda4af' : '#d4d4d8'}}" />
+      </view>
 
       <input
         class="chat-input"
@@ -112,7 +117,9 @@
       <view
         class="send-circle {{draft ? 'send-circle-active' : ''}}"
         bindtap="onTapSend"
-      >➤</view>
+      >
+        <ui-icon name="send" size="34" color="{{draft ? '#ffffff' : '#52525b'}}" />
+      </view>
     </view>
   </view>
 </view>

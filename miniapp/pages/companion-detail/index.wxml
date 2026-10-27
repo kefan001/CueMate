@@ -5,7 +5,10 @@
     <view class="hero-bottom row-between">
       <view>
         <view class="hero-name">{{companion.name}}</view>
-        <view class="hero-level">✓ {{companion.level}}</view>
+        <view class="hero-level row-center">
+          <ui-icon name="check-circle" size="28" color="#facc15" />
+          <text style="margin-left: 8rpx;">{{companion.level}}</text>
+        </view>
       </view>
       <image class="hero-avatar" src="{{companion.avatar}}" mode="aspectFill" />
     </view>
@@ -14,7 +17,10 @@
   <view class="detail-content">
     <view class="stats-bar">
       <view class="stat-col">
-        <view class="stat-val">★ {{reviewSummary.count > 0 ? reviewSummary.average : companion.rating}}</view>
+        <view class="stat-val row-center" style="justify-content:center;">
+          <ui-icon name="star-fill" size="28" color="#facc15" />
+          <text style="margin-left: 8rpx;">{{reviewSummary.count > 0 ? reviewSummary.average : companion.rating}}</text>
+        </view>
         <view class="stat-label">{{reviewSummary.count > 0 ? reviewSummary.count : companion.reviewCount}} 条评价</view>
       </view>
       <view class="stat-divider"></view>
@@ -24,7 +30,10 @@
       </view>
       <view class="stat-divider"></view>
       <view class="stat-col">
-        <view class="stat-val">📍 {{companion.distance}}</view>
+        <view class="stat-val row-center" style="justify-content:center;">
+          <ui-icon name="map-pin" size="28" color="#a1a1aa" />
+          <text style="margin-left: 6rpx;">{{companion.distance}}</text>
+        </view>
         <view class="stat-label">距离</view>
       </view>
     </view>
@@ -99,8 +108,8 @@
         <view wx:for="{{visibleReviews}}" wx:key="orderId" class="card-inner review-card">
           <view class="row-between">
             <text class="review-author">{{item.displayAuthorName}}</text>
-            <view class="review-stars">
-              <text wx:for="{{item.stars}}" wx:key="*this">★</text>
+            <view class="review-stars row-center" style="gap: 4rpx;">
+              <ui-icon wx:for="{{item.stars}}" wx:key="*this" name="star-fill" size="24" color="#facc15" />
             </view>
           </view>
           <view class="review-date">{{item.dateText}}</view>
@@ -118,8 +127,14 @@
 
     <view class="section-block">
       <view class="row-between section-head">
-        <text class="section-title" style="margin-bottom:0;">📅 预约时间</text>
-        <text class="section-sub">ⓘ 提前2小时预约</text>
+        <view class="row-center">
+          <ui-icon name="calendar" size="34" color="#10b981" />
+          <text class="section-title" style="margin-bottom:0; margin-left: 12rpx;">预约时间</text>
+        </view>
+        <view class="row-center section-sub">
+          <ui-icon name="info" size="24" color="#71717a" />
+          <text style="margin-left: 6rpx;">提前2小时预约</text>
+        </view>
       </view>
 
       <scroll-view scroll-x class="date-scroll" show-scrollbar="{{false}}">
@@ -163,7 +178,9 @@
     </view>
 
     <view class="bar-actions">
-      <view class="chat-circle" bindtap="handleOpenChat">💬</view>
+      <view class="chat-circle" bindtap="handleOpenChat">
+        <ui-icon name="message-circle" size="38" color="#e4e4e7" />
+      </view>
       <view
         class="book-btn {{selectedSlots.length === 0 ? 'book-btn-disabled' : ''}}"
         bindtap="handleBook"

@@ -7,18 +7,18 @@
           <text class="page-title">CueMate</text>
         </view>
         <view class="loc-row">
-          <text class="loc-pin">📍</text>
-          <text class="loc-city">{{user.locationCity || '北京市朝阳区'}}</text>
+          <ui-icon name="map-pin" size="24" color="#a1a1aa" />
+          <text class="loc-city" style="margin-left: 8rpx;">{{user.locationCity || '北京市朝阳区'}}</text>
         </view>
         <view class="loc-label">{{user.locationLabel}}</view>
       </view>
 
       <view class="header-actions">
         <view class="circle-btn {{user.locationStatus === 'granted' ? 'circle-btn-granted' : ''}}" bindtap="onRequestLocation">
-          <text>⊕</text>
+          <ui-icon name="locate-fixed" size="34" color="{{user.locationStatus === 'granted' ? '#34d399' : '#d4d4d8'}}" />
         </view>
         <view class="circle-btn" bindtap="onOpenSearch">
-          <text>🔍</text>
+          <ui-icon name="search" size="34" color="#d4d4d8" />
         </view>
       </view>
     </view>
@@ -42,8 +42,9 @@
   <view class="page-body">
     <view class="row-between list-bar">
       <text class="list-count">{{query ? '搜索结果 ' + list.length + ' 位' : '为您推荐 ' + list.length + ' 位陪玩'}}</text>
-      <view class="filter-trigger" bindtap="onOpenFilter">
-        <text>⛭ 筛选</text>
+      <view class="filter-trigger row-center" bindtap="onOpenFilter">
+        <ui-icon name="sliders" size="24" color="#a1a1aa" />
+        <text style="margin-left: 8rpx;">筛选</text>
       </view>
     </view>
 
@@ -77,7 +78,7 @@
           </view>
 
           <view class="rating-row">
-            <text class="star-icon">★</text>
+            <ui-icon name="star-fill" size="24" color="#facc15" />
             <text class="rating-val">{{item.rating}}</text>
             <text class="rating-count">({{item.reviewCount}})</text>
           </view>
@@ -95,7 +96,7 @@
   <modal-sheet open="{{openSearch}}" title="搜索陪玩" bind:close="onCloseSearch">
     <view class="modal-section">
       <view class="search-input-wrap">
-        <text class="search-icon">🔍</text>
+        <ui-icon name="search" size="30" color="#a1a1aa" />
         <input
           class="search-input"
           value="{{query}}"
@@ -103,7 +104,9 @@
           placeholder="输入姓名 / 标签 / 玩法"
           placeholder-style="color:#71717a;"
         />
-        <text wx:if="{{query}}" class="clear-btn" bindtap="onClearQuery">✕</text>
+        <view wx:if="{{query}}" class="clear-btn" bindtap="onClearQuery">
+          <ui-icon name="x" size="28" color="#71717a" />
+        </view>
       </view>
 
       <view class="row-between filter-meta">
@@ -124,7 +127,8 @@
       </view>
 
       <view class="btn-secondary" bindtap="onOpenFilter">
-        ⛭ 更多筛选
+        <ui-icon name="sliders" size="28" color="#e4e4e7" />
+        <text style="margin-left: 12rpx;">更多筛选</text>
       </view>
     </view>
   </modal-sheet>

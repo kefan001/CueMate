@@ -50,8 +50,8 @@
       </view>
 
       <view wx:if="{{item.customerReview}}" class="card-inner review-preview">
-        <view class="stars-row">
-          <text wx:for="{{item.reviewStars}}" wx:key="*this">★</text>
+        <view class="stars-row row-center" style="gap: 4rpx;">
+          <ui-icon wx:for="{{item.reviewStars}}" wx:key="*this" name="star-fill" size="22" color="#facc15" />
         </view>
         <view wx:if="{{item.customerReview.tags && item.customerReview.tags.length}}" class="review-tags-row">
           <text wx:for="{{item.customerReview.tags}}" wx:for-item="tag" wx:key="*this" class="pill pill-active">{{tag}}</text>
@@ -71,10 +71,13 @@
         <view class="action-group">
           <view
             wx:if="{{item.status !== 'cancelled'}}"
-            class="btn-sm-outline"
+            class="btn-sm-outline row-center"
             data-id="{{item.id}}"
             bindtap="openChat"
-          >💬 联系陪玩</view>
+          >
+            <ui-icon name="message-circle" size="24" color="#d4d4d8" />
+            <text style="margin-left: 8rpx;">联系陪玩</text>
+          </view>
 
           <block wx:if="{{item.status === 'pending_payment'}}">
             <view class="btn-sm-outline" data-id="{{item.id}}" bindtap="onOpenCancel">取消</view>
@@ -173,13 +176,14 @@
   <modal-sheet open="{{!!reviewOrder}}" title="服务评价" bind:close="onCloseReview">
     <view wx:if="{{reviewOrder}}" class="modal-stack">
       <view class="star-picker">
-        <text
+        <view
           wx:for="{{[1,2,3,4,5]}}"
           wx:key="*this"
-          class="star-pick-item {{item <= reviewRating ? 'star-pick-on' : ''}}"
           data-star="{{item}}"
           bindtap="onSetReviewRating"
-        >★</text>
+        >
+          <ui-icon name="{{item <= reviewRating ? 'star-fill' : 'star'}}" size="44" color="{{item <= reviewRating ? '#facc15' : '#52525b'}}" />
+        </view>
       </view>
       <textarea
         class="textarea-box"
@@ -202,7 +206,9 @@
         </view>
       </view>
       <view class="anon-row" bindtap="onToggleAnonymous">
-        <view class="anon-check {{reviewAnonymous ? 'anon-check-on' : ''}}">{{reviewAnonymous ? '✓' : ''}}</view>
+        <view class="anon-check {{reviewAnonymous ? 'anon-check-on' : ''}}">
+          <ui-icon wx:if="{{reviewAnonymous}}" name="check" size="24" color="#10b981" />
+        </view>
         <text>匿名评价</text>
       </view>
       <view class="btn-primary" bindtap="submitReview">提交评价</view>

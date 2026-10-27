@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "陪玩详情"
+  "navigationBarTitleText": "陪玩详情",
+  "usingComponents": {
+    "ui-icon": "/components/ui-icon/index"
+  }
 }
