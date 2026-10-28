@@ -1,4 +1,5 @@
 const store = require('../../utils/store');
+const api = require('../../utils/api');
 const {
   USER_ORDER_TABS,
   ORDER_STATUS_TEXT,
@@ -83,6 +84,11 @@ Page({
     return this.data.filteredOrders.find(o => o.id === id) || store.getState().orders.find(o => o.id === id);
   },
 
+  onOpenVenueMap(e) {
+    const { venue, address } = e.currentTarget.dataset;
+    api.openVenueLocation(venue, address);
+  },
+
   openChat(e) {
     const id = e.currentTarget.dataset.id;
     const order = this.findOrder(id);
@@ -112,12 +118,34 @@ Page({
     this.setData({ payingOrder: null, error: '' });
   },
 
+  confirmWxPay() {
+    const { payingOrder } = this.data;
+    if (!payingOrder) return;
+    store
+      .requestWeChatPay({
+        orderId: payingOrder.id,
+        amount: payingOrder.totalPrice,
+        title: `订单支付 ${payingOrder.companionName}`,
+      })
+      .then(res => {
+        if (res && res.ok) {
+          store.updateOrder(payingOrder.id, {
+            status: 'paid',
+            refundAmount: undefined,
+            refundReason: undefined,
+          });
+          this.setData({ payingOrder: null, error: '' });
+          wx.showToast({ title: '微信支付成功', icon: 'success' });
+        }
+      });
+  },
+
   confirmPay() {
     const { payingOrder } = this.data;
     if (!payingOrder) return;
     const result = store.pay(payingOrder.totalPrice);
     if (!result.ok) {
-      this.setData({ error: '余额不足，请先到「我的 -> 钱包」充值' });
+      this.setData({ error: '余额不足，请使用微信支付或先充值钱包' });
       return;
     }
     store.updateOrder(payingOrder.id, {
@@ -125,6 +153,7 @@ Page({
       refundAmount: undefined,
       refundReason: undefined,
     });
+    api.requestSubscribe('order_paid');
     this.setData({ payingOrder: null, error: '' });
     wx.showToast({ title: '支付成功', icon: 'success' });
   },
@@ -283,7 +312,7 @@ Page({
   submitReview() {
     const { reviewOrder, reviewRating, reviewContent, reviewAnonymous } = this.data;
     if (!reviewOrder) return;
-    store.updateOrder(reviewOrder.id, {
+    const res = store.updateOrder(reviewOrder.id, {
       customerReview: {
         rating: reviewRating,
         content: reviewContent.trim() || '这次服务整体不错，流程顺畅。',
@@ -293,6 +322,10 @@ Page({
       },
       status: 'completed',
     });
+    if (res && res.ok === false) {
+      wx.showToast({ title: res.message || '评价未通过安全检测', icon: 'none' });
+      return;
+    }
     this.setData({ reviewOrder: null });
     wx.showToast({ title: '评价已发布', icon: 'success' });
   },

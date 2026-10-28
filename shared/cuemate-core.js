@@ -29,6 +29,30 @@ export const ORDER_STATUS_TEXT = {
   no_show_companion: { label: '陪玩爽约', color: 'text-red-300', bg: 'bg-red-400/10', tone: 'red' },
 };
 
+export const VENUES = [
+  {
+    id: 'v_wangjing',
+    name: 'CueMate 台球俱乐部（望京店）',
+    address: '北京市朝阳区望京SOHO 3号楼 B1层',
+    latitude: 39.9968,
+    longitude: 116.4808,
+  },
+  {
+    id: 'v_guomao',
+    name: 'CueMate 台球俱乐部（国贸店）',
+    address: '北京市朝阳区建国路88号 SOHO现代城',
+    latitude: 39.9072,
+    longitude: 116.4712,
+  },
+  {
+    id: 'v_sanlitun',
+    name: 'CueMate 台球俱乐部（三里屯店）',
+    address: '北京市朝阳区工体北路8号 三里屯SOHO',
+    latitude: 39.9337,
+    longitude: 116.4535,
+  },
+];
+
 export const companions = [
   {
     id: 'c1',
@@ -41,6 +65,11 @@ export const companions = [
     tags: ['斯诺克', '耐心教学', '单杆破百'],
     bio: '前职业斯诺克选手，拥有10年教龄。擅长纠正发力动作，走位思路教学。无论你是新手还是想突破瓶颈的进阶玩家，我都能帮你提升。',
     distance: '1.2km',
+    venueName: 'CueMate 台球俱乐部（望京店）',
+    venueAddress: '北京市朝阳区望京SOHO 3号楼 B1层',
+    venueLat: 39.9968,
+    venueLng: 116.4808,
+    onlineStatus: 'online',
     images: ['https://picsum.photos/seed/mike1/600/400', 'https://picsum.photos/seed/mike2/600/400'],
   },
   {
@@ -54,6 +83,11 @@ export const companions = [
     tags: ['中式八球', '氛围担当', '高颜值'],
     bio: '热爱中式八球，球风稳健。性格开朗，擅长带动气氛，不仅能陪练，还能让你在轻松愉快的氛围中享受台球的乐趣。',
     distance: '2.5km',
+    venueName: 'CueMate 台球俱乐部（望京店）',
+    venueAddress: '北京市朝阳区望京SOHO 3号楼 B1层',
+    venueLat: 39.9968,
+    venueLng: 116.4808,
+    onlineStatus: 'online',
     images: ['https://picsum.photos/seed/yaya1/600/400', 'https://picsum.photos/seed/yaya2/600/400'],
   },
   {
@@ -67,6 +101,11 @@ export const companions = [
     tags: ['美式九球', '跳球绝技', '实战对抗'],
     bio: '美式九球狂热爱好者，精通各种跳球、加塞技巧。喜欢实战对抗，如果你想体验高强度的比赛节奏，找我准没错。',
     distance: '3.8km',
+    venueName: 'CueMate 台球俱乐部（国贸店）',
+    venueAddress: '北京市朝阳区建国路88号 SOHO现代城',
+    venueLat: 39.9072,
+    venueLng: 116.4712,
+    onlineStatus: 'online',
     images: ['https://picsum.photos/seed/alex1/600/400'],
   },
 ];
@@ -613,3 +652,106 @@ export function formatHourMinute(isoStr) {
   const min = String(d.getMinutes()).padStart(2, '0');
   return `${hh}:${min}`;
 }
+
+// ==================== Commercial & Compliance Helpers ====================
+
+export const ACTIVE_LOCK_STATUSES = [
+  'pending_payment',
+  'paid',
+  'in_progress',
+  'awaiting_confirmation',
+];
+
+export function resolveVenueCoords(venueName, venueAddress) {
+  const matched = VENUES.find(
+    v => v.name === venueName || (venueName && v.name.includes(venueName))
+  );
+  if (matched) {
+    return {
+      name: matched.name,
+      address: venueAddress || matched.address,
+      latitude: matched.latitude,
+      longitude: matched.longitude,
+    };
+  }
+  return {
+    name: venueName || 'CueMate 合作台球厅',
+    address: venueAddress || '北京市朝阳区望京SOHO 3号楼',
+    latitude: 39.9968,
+    longitude: 116.4808,
+  };
+}
+
+export function getLockedSlotsForCompanion(orders, companionId, dateStr, excludeOrderId = '') {
+  const locked = new Set();
+  (orders || []).forEach(order => {
+    if (!order || order.id === excludeOrderId) return;
+    if (order.companionId !== companionId) return;
+    if (order.date !== dateStr) return;
+    if (!ACTIVE_LOCK_STATUSES.includes(order.status)) return;
+    (order.timeSlots || []).forEach(slot => locked.add(slot));
+  });
+  return locked;
+}
+
+export const SENSITIVE_WORDS = [
+  '赌球',
+  '赌博',
+  '外围',
+  '盘口',
+  '博彩',
+  '洗钱',
+  '刷单',
+  '裸聊',
+  '色情',
+  '援交',
+  '毒品',
+];
+
+export function checkContentSecurity(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return { ok: true };
+  for (const word of SENSITIVE_WORDS) {
+    if (raw.includes(word)) {
+      return {
+        ok: false,
+        word,
+        message: `内容包含违规敏感词「${word}」，已被微信内容安全接口（msgSecCheck）拦截`,
+      };
+    }
+  }
+  return { ok: true };
+}
+
+export const SUBSCRIBE_TEMPLATES = {
+  ORDER_PAID: 'tmpl_cuemate_order_paid_01',
+  SERVICE_STARTED: 'tmpl_cuemate_service_start_02',
+  NEW_MESSAGE: 'tmpl_cuemate_new_msg_03',
+};
+
+export const COMPLIANCE_DOCS = {
+  agreement: {
+    title: 'CueMate 用户服务协议',
+    content:
+      '1. 本平台提供正规绿色台球运动助教、技术指导及同城球房预约服务。\n' +
+      '2. 仅限年满 18 周岁的完全民事行为能力人注册并预约线下台球陪练服务。\n' +
+      '3. 严禁利用本平台开展任何形式的赌球、博彩、违规场外交易或违法违纪活动。\n' +
+      '4. 订单资金由平台担保结算，服务开始前按规则支持改期或取消，发生争议可提交平台仲裁。',
+  },
+  privacy: {
+    title: 'CueMate 隐私保护指引',
+    content:
+      '1. 位置信息（wx.getLocation / wx.openLocation）：仅用于展示附近台球厅距离及导航，不会在后台持续追踪。\n' +
+      '2. 相册与摄像头（wx.chooseMedia）：仅用于发送订单沟通图片或上传个人头像/达人认证照片。\n' +
+      '3. 麦克风权限（wx.getRecorderManager）：仅用于在会话页按住发送语音沟通消息。\n' +
+      '4. 手机号授权（getPhoneNumber）：仅用于实名账号绑定与订单履约联系。',
+  },
+  safety: {
+    title: '绿色健康约球安全须知',
+    content:
+      '• 请在平台认证的公开正规台球俱乐部/球房内开展练球与教学活动。\n' +
+      '• 严禁任何形式的打彩、赌球及私下违规转账交易，保障自身资金与人身安全。\n' +
+      '• 到店后请核对订单 6 位服务验证码，完成后在小程序内确认核销。',
+  },
+};
+

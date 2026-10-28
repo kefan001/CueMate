@@ -1,4 +1,5 @@
 const store = require('../../utils/store');
+const api = require('../../utils/api');
 const { getQuickReplies, formatHourMinute } = require('../../shared/cuemate-core');
 
 Page({
@@ -45,16 +46,18 @@ Page({
         const durationSec = Math.max(1, Math.round((res.duration || 2000) / 1000));
         this.setData({
           isRecording: false,
-          recordingHint: `语音 ${durationSec}s 已发送`,
+          recordingHint: `正在上传语音 (${durationSec}s)...`,
         });
-        this.sendPayload({
-          type: 'voice',
-          mediaUrl: res.tempFilePath,
-          durationSec,
+        api.uploadMedia(res.tempFilePath).then(uploaded => {
+          this.setData({ recordingHint: `语音 ${durationSec}s 已发送` });
+          this.sendPayload({
+            type: 'voice',
+            mediaUrl: uploaded.url || res.tempFilePath,
+            durationSec,
+          });
         });
       });
       recorder.onError(() => {
-        // Fallback for simulator when microphone is unavailable
         const durationSec = Math.max(1, Math.round((Date.now() - (this._recordStartAt || Date.now())) / 1000));
         this.setData({
           isRecording: false,
@@ -131,6 +134,12 @@ Page({
     });
   },
 
+  onOpenVenueMap() {
+    const { thread } = this.data;
+    if (!thread || !thread.venueName) return;
+    api.openVenueLocation(thread.venueName);
+  },
+
   onDraftInput(e) {
     this.setData({ draft: e.detail.value });
   },
@@ -141,13 +150,17 @@ Page({
     const normalizedText = payload.text ? String(payload.text).trim() : '';
     if ((payload.type || 'text') === 'text' && !normalizedText) return;
 
-    store.sendMessage(thread.id, {
+    const res = store.sendMessage(thread.id, {
       sender: currentRole,
       type: payload.type || 'text',
       text: normalizedText,
       mediaUrl: payload.mediaUrl,
       durationSec: payload.durationSec,
     });
+    if (res && res.ok === false) {
+      wx.showToast({ title: res.message || '内容未通过安全检测', icon: 'none' });
+      return;
+    }
     this.setData({ draft: '' });
   },
 
@@ -168,10 +181,14 @@ Page({
       success: res => {
         const file = res.tempFiles?.[0];
         if (!file) return;
-        this.sendPayload({
-          type: 'image',
-          mediaUrl: file.tempFilePath,
-          text: '现场球台图片',
+        wx.showLoading({ title: '上传图片中...' });
+        api.uploadMedia(file.tempFilePath).then(uploaded => {
+          wx.hideLoading();
+          this.sendPayload({
+            type: 'image',
+            mediaUrl: uploaded.url || file.tempFilePath,
+            text: '现场球台图片',
+          });
         });
       },
       fail: () => {

@@ -27,9 +27,14 @@
         </view>
         <ui-icon name="sparkles" size="32" color="#facc15" />
       </view>
-      <view wx:if="{{thread.venueName}}" class="sc-venue" style="display:flex;align-items:center;gap:8rpx;">
+      <view
+        wx:if="{{thread.venueName}}"
+        class="sc-venue"
+        style="display:flex;align-items:center;gap:8rpx;"
+        bindtap="onOpenVenueMap"
+      >
         <ui-icon name="map-pin" size="26" color="#34d399" />
-        <text>{{thread.venueName}}</text>
+        <text>{{thread.venueName}} · 导航</text>
       </view>
     </view>
 

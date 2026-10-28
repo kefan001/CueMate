@@ -13,7 +13,9 @@
 
 ### `miniapp/`（微信小程序端）
 
-直接打开 **微信开发者工具 -> 导入项目**，选择 `miniapp/` 目录即可运行。
+直接打开 **微信开发者工具 -> 导入项目**，选择 `miniapp/` 目录即可运行。  
+详细功能完成清单与本地/云开发切换说明见：[`docs/wechat-miniapp-status.md`](./docs/wechat-miniapp-status.md)。
+
 若修改了 `shared/cuemate-core.js`，可运行：
 
 ```bash

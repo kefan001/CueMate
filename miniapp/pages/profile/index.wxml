@@ -130,30 +130,33 @@
         <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
-      <view class="menu-item" data-tip="可在「切换身份」中直接体验陪玩端工作台" bindtap="onMenuTip">
+      <view class="menu-item" bindtap="onOpenApply">
         <view class="menu-left">
           <view class="menu-icon icon-gold">
             <ui-icon name="star" size="34" color="#facc15" />
           </view>
-          <view class="menu-title">成为陪玩 / 达人认证</view>
+          <view>
+            <view class="menu-title">成为陪玩 / 达人认证</view>
+            <view class="menu-sub">实名入驻、设定时薪与常驻球房</view>
+          </view>
         </view>
         <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
-      <view class="menu-item" data-tip="已支持手机号验证码登录与找回密码" bindtap="onMenuTip">
+      <view class="menu-item" data-tip="已支持微信 jscode2session 静默登录与手机号授权" bindtap="onMenuTip">
         <view class="menu-left">
           <view class="menu-icon icon-green">
             <ui-icon name="smartphone" size="34" color="#34d399" />
           </view>
           <view>
             <view class="menu-title">账号安全</view>
-            <view class="menu-sub">支持验证码登录与找回密码</view>
+            <view class="menu-sub">微信绑定与手机号实名保护</view>
           </view>
         </view>
-        <text class="menu-sub">{{user.lastLoginAt ? '最近已登录' : '未记录'}}</text>
+        <text class="menu-sub">{{user.lastLoginAt ? '最近已登录' : '已保护'}}</text>
       </view>
 
-      <view class="menu-item" data-tip="客服热线：400-800-8899（演示）" bindtap="onMenuTip">
+      <view class="menu-item" data-tip="客服热线：400-800-8899（工作日 09:00-22:00）" bindtap="onMenuTip">
         <view class="menu-left">
           <view class="menu-icon">
             <ui-icon name="help-circle" size="34" color="#a1a1aa" />
@@ -163,12 +166,15 @@
         <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
 
-      <view class="menu-item menu-item-last" data-tip="当前版本：v1.0.0 小程序版" bindtap="onMenuTip">
+      <view class="menu-item menu-item-last" bindtap="onOpenPrivacyDoc">
         <view class="menu-left">
           <view class="menu-icon">
             <ui-icon name="settings" size="34" color="#a1a1aa" />
           </view>
-          <view class="menu-title">通用设置</view>
+          <view>
+            <view class="menu-title">隐私保护指引与服务协议</view>
+            <view class="menu-sub">v1.2.0 商业版 · 本地 SQLite 已连接</view>
+          </view>
         </view>
         <ui-icon name="chevron-right" size="32" color="#52525b" />
       </view>
@@ -194,20 +200,41 @@
         <view class="btn-secondary" data-amount="100" bindtap="onCharge">充值 ¥100</view>
         <view class="btn-secondary" data-amount="300" bindtap="onCharge">充值 ¥300</view>
       </view>
-      <view class="loc-sub">说明：这是演示用的“钱包充值”，用于体验订单支付流程。</view>
+      <view class="loc-sub">支持微信支付（JSAPI）充值与订单原路退款。</view>
     </view>
   </modal-sheet>
 
   <!-- 编辑资料 Modal -->
   <modal-sheet open="{{openEdit}}" title="编辑资料" bind:close="onCloseEdit">
     <view class="modal-stack">
+      <view class="row-between card-inner" style="padding: 20rpx 24rpx;">
+        <view class="row-center" style="gap: 16rpx;">
+          <image
+            src="{{profileAvatar || user.avatar}}"
+            mode="aspectFill"
+            style="width: 84rpx; height: 84rpx; border-radius: 999rpx; border: 2rpx solid #10b981;"
+          />
+          <view>
+            <view style="font-size: 26rpx; color: #f4f4f5; font-weight: 600;">头像设置</view>
+            <view style="font-size: 22rpx; color: #71717a;">支持一键获取微信头像</view>
+          </view>
+        </view>
+        <button
+          open-type="chooseAvatar"
+          bindchooseavatar="onChooseWxAvatar"
+          class="btn-sm-outline"
+          style="margin: 0; line-height: 1.5;"
+        >使用微信头像</button>
+      </view>
       <view>
-        <view class="field-label">昵称</view>
+        <view class="field-label">昵称（支持微信昵称自动填入）</view>
         <input
+          type="nickname"
           class="input-box"
           value="{{profileName}}"
           data-field="profileName"
           bindinput="onInputField"
+          bindchange="onInputField"
         />
       </view>
       <view>
@@ -244,6 +271,79 @@
     </view>
   </modal-sheet>
 
+  <!-- 成为陪玩 / 达人认证 Modal -->
+  <modal-sheet open="{{openApply}}" title="成为陪玩 · 达人认证入驻" bind:close="onCloseApply">
+    <view class="modal-stack">
+      <view>
+        <view class="field-label">达人称呼 / 助教艺名</view>
+        <input
+          class="input-box"
+          value="{{applyName}}"
+          data-field="applyName"
+          bindinput="onInputField"
+          placeholder="例如：阿泽 (八球助教)"
+          placeholder-style="color:#52525b;"
+        />
+      </view>
+      <view class="charge-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <view>
+          <view class="field-label">专业段位 / 头衔</view>
+          <input
+            class="input-box"
+            value="{{applyLevel}}"
+            data-field="applyLevel"
+            bindinput="onInputField"
+            placeholder="如：中式八球七档"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+        <view>
+          <view class="field-label">服务时薪 (¥/小时)</view>
+          <input
+            type="number"
+            class="input-box"
+            value="{{applyRate}}"
+            data-field="applyRate"
+            bindinput="onInputField"
+            placeholder="168"
+            placeholder-style="color:#52525b;"
+          />
+        </view>
+      </view>
+      <view>
+        <view class="field-label">常驻合作球房</view>
+        <input
+          class="input-box"
+          value="{{applyVenue}}"
+          data-field="applyVenue"
+          bindinput="onInputField"
+          placeholder="CueMate 台球俱乐部（望京店）"
+          placeholder-style="color:#52525b;"
+        />
+      </view>
+      <view>
+        <view class="field-label">教学与陪练特长介绍</view>
+        <textarea
+          class="textarea-box"
+          value="{{applyBio}}"
+          data-field="applyBio"
+          bindinput="onInputField"
+          placeholder="介绍你的擅长球类、教学风格或实战陪练特点..."
+          placeholder-style="color:#52525b;"
+        />
+      </view>
+      <view class="btn-primary" bindtap="onSubmitApply">提交认证并开启接单台</view>
+    </view>
+  </modal-sheet>
+
+  <!-- 隐私与合规说明 Modal -->
+  <modal-sheet open="{{openPrivacyDoc}}" title="{{privacyDoc.title}}" bind:close="onClosePrivacyDoc">
+    <view class="modal-stack">
+      <text style="font-size: 25rpx; color: #d4d4d8; line-height: 1.8; white-space: pre-wrap;">{{privacyDoc.content}}</text>
+      <view class="btn-primary" bindtap="onClosePrivacyDoc">我知道了</view>
+    </view>
+  </modal-sheet>
+
   <!-- 选择身份 Modal -->
   <modal-sheet open="{{openRole}}" title="选择身份" bind:close="onCloseRole">
     <view class="modal-stack">
@@ -267,7 +367,7 @@
           <image class="role-comp-avatar" src="{{item.avatar}}" mode="aspectFill" />
           <view>
             <view class="role-card-title">{{item.name}}</view>
-            <view class="loc-sub">{{item.level}}</view>
+            <view class="loc-sub">{{item.level}} · ¥{{item.hourlyRate}}/h</view>
           </view>
         </view>
       </view>

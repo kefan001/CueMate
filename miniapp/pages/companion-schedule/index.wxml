@@ -3,11 +3,51 @@
     <view class="page-title">我的日程</view>
     <view class="page-subtitle" style="display:flex;align-items:center;gap:8rpx;">
       <ui-icon name="calendar" size="24" color="#71717a" />
-      <text>近期待预约与服务时间一览</text>
+      <text>档期排班开关与待履约订单一览</text>
     </view>
   </view>
 
   <view class="page-body">
+    <view class="card">
+      <view class="row-between" style="margin-bottom: 20rpx;">
+        <text style="font-size: 28rpx; font-weight: 700; color: #ffffff;">排班时段管理</text>
+        <text style="font-size: 22rpx; color: #71717a;">点击时段切换可约 / 休息</text>
+      </view>
+
+      <scroll-view scroll-x show-scrollbar="{{false}}" style="white-space: nowrap; margin-bottom: 20rpx;">
+        <view style="display: inline-flex; gap: 14rpx;">
+          <view
+            wx:for="{{dates}}"
+            wx:key="fullDateStr"
+            class="pill {{selectedDate === index ? 'pill-active' : ''}}"
+            data-index="{{index}}"
+            bindtap="onSelectDate"
+          >
+            {{item.dayStr}} {{item.dateStr}}
+          </view>
+        </view>
+      </scroll-view>
+
+      <view style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14rpx;">
+        <view
+          wx:for="{{daySlots}}"
+          wx:key="time"
+          class="card-inner"
+          style="text-align: center; padding: 18rpx 12rpx; border: 2rpx solid {{item.locked ? '#f59e0b' : item.open ? '#10b981' : '#27272a'}}; opacity: {{item.open || item.locked ? '1' : '0.55'}};"
+          data-time="{{item.time}}"
+          data-locked="{{item.locked}}"
+          bindtap="onToggleSlot"
+        >
+          <view style="font-size: 26rpx; font-weight: 700; color: #ffffff;">{{item.time}}</view>
+          <view style="font-size: 20rpx; margin-top: 6rpx; color: {{item.locked ? '#facc15' : item.open ? '#34d399' : '#71717a'}};">
+            {{item.locked ? '已有预约' : item.open ? '开放可约' : '已设休息'}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view style="font-size: 28rpx; font-weight: 700; color: #e4e4e7; margin: 12rpx 0 20rpx;">待履约与历史日程</view>
+
     <view wx:if="{{scheduleOrders.length === 0}}" class="empty-box">
       暂无安排，可以安心挂单接活～
     </view>
@@ -18,9 +58,16 @@
         <view class="status-badge tone-{{item.statusMeta.tone}}">{{item.statusMeta.label}}</view>
       </view>
 
-      <view wx:if="{{item.venueName}}" class="sched-venue" style="display:flex;align-items:center;gap:8rpx;">
-        <ui-icon name="map-pin" size="24" color="#a1a1aa" />
-        <text>{{item.venueName}}</text>
+      <view
+        wx:if="{{item.venueName}}"
+        class="sched-venue"
+        style="display:flex;align-items:center;gap:8rpx;"
+        data-venue="{{item.venueName}}"
+        data-address="{{item.venueAddress}}"
+        bindtap="onOpenVenueMap"
+      >
+        <ui-icon name="map-pin" size="24" color="#34d399" />
+        <text>{{item.venueName}} · 导航</text>
       </view>
       <view wx:if="{{item.note}}" class="sched-note">备注：{{item.note}}</view>
     </view>

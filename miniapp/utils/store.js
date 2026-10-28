@@ -1,8 +1,10 @@
 const core = require('../shared/cuemate-core');
 const { readJson, writeJson } = require('./storage');
+const api = require('./api');
 
 const {
   STORAGE_KEYS,
+  companions: defaultCompanions,
   mockUser,
   mockOrders,
   mockChatThreads,
@@ -19,7 +21,17 @@ const {
   upsertThread,
   updateThread,
   replyTextFor,
+  getLockedSlotsForCompanion,
+  checkContentSecurity,
 } = core;
+
+const EXTRA_KEYS = {
+  COMPANIONS: 'cuemate.companions.v1',
+  APPLICATIONS: 'cuemate.applications.v1',
+  WITHDRAWALS: 'cuemate.withdrawals.v1',
+  CUSTOM_SCHEDULES: 'cuemate.schedules.v1',
+  PRIVACY_AGREED: 'cuemate.privacy.v1',
+};
 
 const listeners = new Set();
 const autoReplyTimers = {};
@@ -28,9 +40,14 @@ let state = {
   initialized: false,
   accounts: [],
   verifications: {},
+  companions: [],
   user: { ...mockUser },
   orders: [],
   threads: [],
+  applications: [],
+  withdrawals: [],
+  customSchedules: {},
+  privacyAgreed: false,
   connectionState: 'fallback',
 };
 
@@ -44,6 +61,69 @@ function notify() {
   });
 }
 
+function pushSyncToServer() {
+  api
+    .request('/api/sync', 'POST', {
+      accounts: state.accounts,
+      companions: state.companions,
+      orders: state.orders,
+      threads: state.threads,
+      applications: state.applications,
+      withdrawals: state.withdrawals,
+      customSchedules: state.customSchedules,
+    })
+    .then(res => {
+      if (res && res.ok && state.connectionState !== 'connected') {
+        state.connectionState = 'connected';
+        notify();
+      }
+    });
+}
+
+function syncFromServer() {
+  return api.request('/api/bootstrap', 'GET').then(res => {
+    if (!res || !res.ok) {
+      if (state.connectionState !== 'fallback') {
+        state.connectionState = 'fallback';
+        notify();
+      }
+      return { ok: false };
+    }
+
+    state.connectionState = 'connected';
+    if (Array.isArray(res.companions) && res.companions.length) {
+      state.companions = res.companions;
+      writeJson(EXTRA_KEYS.COMPANIONS, state.companions);
+    }
+    if (Array.isArray(res.orders)) {
+      state.orders = res.orders.map(normalizeOrder);
+      writeJson(STORAGE_KEYS.ORDERS, state.orders);
+    }
+    if (Array.isArray(res.threads)) {
+      state.threads = res.threads;
+      writeJson(STORAGE_KEYS.CHAT, state.threads);
+    }
+    if (Array.isArray(res.accounts) && res.accounts.length) {
+      state.accounts = ensureAccounts(res.accounts);
+      writeJson(STORAGE_KEYS.ACCOUNTS, state.accounts);
+    }
+    if (Array.isArray(res.applications)) {
+      state.applications = res.applications;
+      writeJson(EXTRA_KEYS.APPLICATIONS, state.applications);
+    }
+    if (Array.isArray(res.withdrawals)) {
+      state.withdrawals = res.withdrawals;
+      writeJson(EXTRA_KEYS.WITHDRAWALS, state.withdrawals);
+    }
+    if (res.customSchedules && typeof res.customSchedules === 'object') {
+      state.customSchedules = res.customSchedules;
+      writeJson(EXTRA_KEYS.CUSTOM_SCHEDULES, state.customSchedules);
+    }
+    notify();
+    return { ok: true };
+  });
+}
+
 function init() {
   if (state.initialized) return state;
   const fallbackAccounts = [createDefaultAccount()];
@@ -51,18 +131,30 @@ function init() {
   const accounts = ensureAccounts(rawAccounts);
   const user = readJson(STORAGE_KEYS.USER, mockUser);
   const verifications = readJson(STORAGE_KEYS.VERIFICATIONS, {});
+  const companions = readJson(EXTRA_KEYS.COMPANIONS, defaultCompanions);
   const orders = readJson(STORAGE_KEYS.ORDERS, mockOrders).map(normalizeOrder);
   const threads = readJson(STORAGE_KEYS.CHAT, mockChatThreads);
+  const applications = readJson(EXTRA_KEYS.APPLICATIONS, []);
+  const withdrawals = readJson(EXTRA_KEYS.WITHDRAWALS, []);
+  const customSchedules = readJson(EXTRA_KEYS.CUSTOM_SCHEDULES, {});
+  const privacyAgreed = Boolean(readJson(EXTRA_KEYS.PRIVACY_AGREED, false));
 
   state = {
     initialized: true,
     accounts,
     verifications,
+    companions,
     user,
     orders,
     threads,
+    applications,
+    withdrawals,
+    customSchedules,
+    privacyAgreed,
     connectionState: 'fallback',
   };
+
+  syncFromServer();
   return state;
 }
 
@@ -86,6 +178,7 @@ function saveUser(nextUser) {
 function saveAccounts(nextAccounts) {
   state.accounts = nextAccounts;
   writeJson(STORAGE_KEYS.ACCOUNTS, state.accounts);
+  pushSyncToServer();
 }
 
 function saveVerifications(nextVerifications) {
@@ -93,15 +186,30 @@ function saveVerifications(nextVerifications) {
   writeJson(STORAGE_KEYS.VERIFICATIONS, state.verifications);
 }
 
+function saveCompanions(nextCompanions) {
+  state.companions = nextCompanions;
+  writeJson(EXTRA_KEYS.COMPANIONS, state.companions);
+  pushSyncToServer();
+  notify();
+}
+
 function saveOrders(nextOrders) {
   state.orders = nextOrders;
   writeJson(STORAGE_KEYS.ORDERS, state.orders);
+  pushSyncToServer();
   notify();
 }
 
 function saveThreads(nextThreads) {
   state.threads = nextThreads;
   writeJson(STORAGE_KEYS.CHAT, state.threads);
+  pushSyncToServer();
+  notify();
+}
+
+function agreePrivacy() {
+  state.privacyAgreed = true;
+  writeJson(EXTRA_KEYS.PRIVACY_AGREED, true);
   notify();
 }
 
@@ -129,6 +237,40 @@ function pay(amount) {
   return { ok: true };
 }
 
+function requestWeChatPay({ orderId, amount, title = 'CueMate 台球陪练预约' }) {
+  const num = Number(amount);
+  return api.request('/api/pay/prepay', 'POST', { orderId, amount: num, title }).then(res => {
+    const payParams = res && res.paymentParams ? res.paymentParams : null;
+    return new Promise(resolve => {
+      if (typeof wx !== 'undefined' && wx.showModal) {
+        wx.showModal({
+          title: '微信支付收银台',
+          content: `${title}\n需支付金额：¥${num.toFixed(2)}\n（个体户商户号 JSAPI 预付单已生成）`,
+          confirmText: '确认支付',
+          cancelText: '稍后支付',
+          confirmColor: '#10b981',
+          success(modalRes) {
+            if (modalRes.confirm) {
+              if (state.user.balance >= num) {
+                pay(num);
+              }
+              api.requestSubscribe('order_paid');
+              resolve({ ok: true, channel: 'wechat_pay', prepay: payParams });
+            } else {
+              resolve({ ok: false, reason: 'user_cancelled' });
+            }
+          },
+          fail() {
+            resolve({ ok: false, reason: 'modal_failed' });
+          },
+        });
+      } else {
+        resolve({ ok: true, channel: 'wechat_pay', prepay: payParams });
+      }
+    });
+  });
+}
+
 function applyLoginState(account) {
   const now = new Date().toISOString();
   saveAccounts(
@@ -149,10 +291,55 @@ function applyLoginState(account) {
     phone: account.phone,
     bio: account.bio,
     gender: account.gender,
+    openid: account.openid,
     role: 'user',
     companionId: undefined,
     isAuthenticated: true,
     lastLoginAt: now,
+  });
+}
+
+function wxQuickLogin(options = {}) {
+  return new Promise(resolve => {
+    const finishLogin = code => {
+      const targetPhone = options.phone || state.user.phone || mockUser.phone;
+      api
+        .request('/api/auth/wx-login', 'POST', {
+          code,
+          phone: targetPhone,
+          name: options.name,
+          avatar: options.avatar,
+        })
+        .then(res => {
+          if (res && res.ok && res.account) {
+            const exists = state.accounts.some(a => a.phone === res.account.phone);
+            if (!exists) {
+              saveAccounts([res.account, ...state.accounts]);
+            }
+            applyLoginState(res.account);
+            resolve({ ok: true, openid: res.openid, phone: res.account.phone });
+            return;
+          }
+          // Offline fallback
+          const fallbackAcc =
+            state.accounts.find(a => a.phone === targetPhone) || createDefaultAccount();
+          applyLoginState(fallbackAcc);
+          resolve({ ok: true, openid: 'wx_local_openid', phone: fallbackAcc.phone });
+        });
+    };
+
+    if (typeof wx !== 'undefined' && wx.login) {
+      wx.login({
+        success(res) {
+          finishLogin(res.code || 'wx_sim_code');
+        },
+        fail() {
+          finishLogin('wx_fallback_code');
+        },
+      });
+    } else {
+      finishLogin('wx_fallback_code');
+    }
   });
 }
 
@@ -255,6 +442,9 @@ function register({ name, phone, password, code }) {
   const normalizedPhone = String(phone || '').trim();
   const normalizedPassword = String(password || '').trim();
 
+  const sec = checkContentSecurity(normalizedName);
+  if (!sec.ok) return sec;
+
   if (!isValidPhone(normalizedPhone)) {
     return { ok: false, message: '请输入正确的手机号' };
   }
@@ -311,11 +501,16 @@ function resetPassword({ phone, code, newPassword }) {
   return { ok: true, message: '密码已重置，请使用新密码登录' };
 }
 
-function updateProfile({ name, bio, gender }) {
+function updateProfile({ name, bio, gender, avatar }) {
   const normalizedName = String(name || '').trim();
   if (!normalizedName) {
     return { ok: false, message: '昵称不能为空' };
   }
+
+  const sec = checkContentSecurity(`${normalizedName} ${bio || ''}`);
+  if (!sec.ok) return sec;
+
+  const nextAvatar = avatar || state.user.avatar;
 
   saveAccounts(
     state.accounts.map(item =>
@@ -325,6 +520,7 @@ function updateProfile({ name, bio, gender }) {
             name: normalizedName,
             bio: String(bio || '').trim(),
             gender,
+            avatar: nextAvatar,
           }
         : item
     )
@@ -335,6 +531,7 @@ function updateProfile({ name, bio, gender }) {
     name: normalizedName,
     bio: String(bio || '').trim(),
     gender,
+    avatar: nextAvatar,
   });
 
   return { ok: true, message: '资料已更新' };
@@ -376,7 +573,6 @@ function requestLocation() {
         resolve({ ok: true });
       },
       fail() {
-        // Fallback for simulator when location permission is not configured
         saveUser({
           ...state.user,
           locationStatus: 'granted',
@@ -393,19 +589,187 @@ function requestLocation() {
 function resetUser() {
   saveAccounts([createDefaultAccount()]);
   saveVerifications({});
+  saveCompanions(defaultCompanions);
   saveOrders(mockOrders.map(normalizeOrder));
   saveThreads(mockChatThreads);
+  state.applications = [];
+  state.withdrawals = [];
+  state.customSchedules = {};
+  writeJson(EXTRA_KEYS.APPLICATIONS, []);
+  writeJson(EXTRA_KEYS.WITHDRAWALS, []);
+  writeJson(EXTRA_KEYS.CUSTOM_SCHEDULES, {});
   saveUser({ ...mockUser, isAuthenticated: true });
+  api.request('/api/reset', 'POST', {});
+}
+
+// ==================== Companion Onboarding & Schedule Actions ====================
+
+function submitCompanionApplication(payload) {
+  const name = String(payload.name || '').trim();
+  const level = String(payload.level || '').trim() || '认证台球助教';
+  const hourlyRate = Number(payload.hourlyRate) || 168;
+  const venueName = String(payload.venueName || '').trim() || 'CueMate 台球俱乐部（望京店）';
+  const bio = String(payload.bio || '').trim() || '擅长中式八球实战走位与发力指导，欢迎约球。';
+  const tags =
+    Array.isArray(payload.tags) && payload.tags.length
+      ? payload.tags
+      : ['中式八球', '认证助教', '耐心教学'];
+
+  if (!name) {
+    return Promise.resolve({ ok: false, message: '请填写真实姓名或助教昵称' });
+  }
+
+  const sec = checkContentSecurity(`${name} ${level} ${bio}`);
+  if (!sec.ok) {
+    return Promise.resolve(sec);
+  }
+
+  const compId = `c_${Date.now().toString(36)}`;
+  const newCompanion = {
+    id: compId,
+    name,
+    avatar: payload.avatar || state.user.avatar || createAvatar(name),
+    level,
+    hourlyRate,
+    rating: 5.0,
+    reviewCount: 1,
+    tags,
+    bio,
+    distance: '0.8km',
+    venueName,
+    venueAddress: '北京市朝阳区望京SOHO 3号楼 B1层',
+    venueLat: 39.9968,
+    venueLng: 116.4808,
+    onlineStatus: 'online',
+    images: [
+      payload.photoUrl ||
+        payload.avatar ||
+        state.user.avatar ||
+        'https://picsum.photos/seed/cue_new/600/400',
+    ],
+  };
+
+  return api
+    .request('/api/companions/apply', 'POST', {
+      application: {
+        ...payload,
+        companionId: compId,
+        name,
+        level,
+        hourlyRate,
+        venueName,
+        tags,
+        bio,
+      },
+    })
+    .then(res => {
+      const created = (res && res.companion) || newCompanion;
+      const nextComps = [created, ...state.companions.filter(c => c.id !== created.id)];
+      saveCompanions(nextComps);
+      const appRecord = (res && res.application) || {
+        id: `app_${Date.now()}`,
+        companionId: created.id,
+        name,
+        level,
+        hourlyRate,
+        venueName,
+        status: 'approved',
+        createdAt: new Date().toISOString(),
+      };
+      state.applications = [appRecord, ...state.applications];
+      writeJson(EXTRA_KEYS.APPLICATIONS, state.applications);
+      return { ok: true, companion: created, application: appRecord };
+    });
+}
+
+function toggleCompanionSlot(companionId, dateStr, timeStr) {
+  const key = `${companionId}_${dateStr}`;
+  const disabledList = state.customSchedules[key] || [];
+  const nextList = disabledList.includes(timeStr)
+    ? disabledList.filter(t => t !== timeStr)
+    : [...disabledList, timeStr];
+  state.customSchedules = {
+    ...state.customSchedules,
+    [key]: nextList,
+  };
+  writeJson(EXTRA_KEYS.CUSTOM_SCHEDULES, state.customSchedules);
+  pushSyncToServer();
+  notify();
+  return !nextList.includes(timeStr);
+}
+
+function isSlotDisabledByCompanion(companionId, dateStr, timeStr) {
+  const key = `${companionId}_${dateStr}`;
+  const disabledList = state.customSchedules[key] || [];
+  return disabledList.includes(timeStr);
+}
+
+function toggleCompanionOnlineStatus(companionId) {
+  const nextComps = state.companions.map(comp => {
+    if (comp.id !== companionId) return comp;
+    const nextStatus = comp.onlineStatus === 'resting' ? 'online' : 'resting';
+    return { ...comp, onlineStatus: nextStatus };
+  });
+  saveCompanions(nextComps);
+}
+
+function withdrawCompanionEarnings({ companionId, amount, channel = '微信零钱' }) {
+  const num = Number(amount);
+  if (!Number.isFinite(num) || num <= 0) {
+    return Promise.resolve({ ok: false, message: '暂无可提现金额' });
+  }
+  return api
+    .request('/api/wallet/withdraw', 'POST', { companionId, amount: num, channel })
+    .then(res => {
+      const record = (res && res.withdrawal) || {
+        id: `wd_${Date.now()}`,
+        companionId,
+        amount: num,
+        channel,
+        status: '已到账',
+        createdAt: new Date().toISOString(),
+      };
+      state.withdrawals = [record, ...state.withdrawals];
+      writeJson(EXTRA_KEYS.WITHDRAWALS, state.withdrawals);
+      notify();
+      return { ok: true, withdrawal: record };
+    });
 }
 
 // ==================== Order Actions ====================
 
 function addOrder(order) {
+  const sec = checkContentSecurity(order.note || '');
+  if (!sec.ok) {
+    return sec;
+  }
+
+  const locked = getLockedSlotsForCompanion(state.orders, order.companionId, order.date);
+  const conflict = (order.timeSlots || []).find(s => locked.has(s));
+  if (conflict) {
+    return {
+      ok: false,
+      reason: 'slot_conflict',
+      message: `时段 ${conflict} 已被预约锁定，请选择其他时段`,
+    };
+  }
+
   saveOrders([order, ...state.orders]);
+  api.request('/api/orders', 'POST', { order });
+  return { ok: true, order };
 }
 
 function updateOrder(id, patch) {
+  if (patch.customerReview && patch.customerReview.content) {
+    const sec = checkContentSecurity(patch.customerReview.content);
+    if (!sec.ok) return sec;
+  }
+  if (patch.companionReview && patch.companionReview.content) {
+    const sec = checkContentSecurity(patch.companionReview.content);
+    if (!sec.ok) return sec;
+  }
   saveOrders(state.orders.map(o => (o.id === id ? { ...o, ...patch } : o)));
+  return { ok: true };
 }
 
 // ==================== Chat Actions ====================
@@ -440,6 +804,13 @@ function ensureThread(input) {
 }
 
 function sendMessage(threadId, payload) {
+  if (payload.text) {
+    const sec = checkContentSecurity(payload.text);
+    if (!sec.ok) {
+      return sec;
+    }
+  }
+
   const now = new Date().toISOString();
   const message = {
     id: createMessageId(threadId),
@@ -459,7 +830,7 @@ function sendMessage(threadId, payload) {
     }))
   );
 
-  if (payload.autoReply === false) return;
+  if (payload.autoReply === false) return { ok: true };
 
   const replyRole = payload.sender === 'user' ? 'companion' : 'user';
   const delay = 1200 + Math.floor(Math.random() * 1400);
@@ -487,6 +858,8 @@ function sendMessage(threadId, payload) {
       }))
     );
   }, delay);
+
+  return { ok: true };
 }
 
 function markThreadRead(threadId, role) {
@@ -512,8 +885,12 @@ module.exports = {
   init,
   getState,
   subscribe,
+  syncFromServer,
+  agreePrivacy,
   charge,
   pay,
+  requestWeChatPay,
+  wxQuickLogin,
   setRole,
   sendVerificationCode,
   login,
@@ -524,6 +901,11 @@ module.exports = {
   logout,
   requestLocation,
   resetUser,
+  submitCompanionApplication,
+  toggleCompanionSlot,
+  isSlotDisabledByCompanion,
+  toggleCompanionOnlineStatus,
+  withdrawCompanionEarnings,
   addOrder,
   updateOrder,
   ensureThread,

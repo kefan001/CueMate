@@ -44,6 +44,25 @@
       <view class="tags-row">
         <text wx:for="{{companion.tags}}" wx:key="*this" class="tag">{{item}}</text>
       </view>
+
+      <view
+        class="card-inner row-between"
+        style="margin-top: 24rpx; padding: 24rpx;"
+        bindtap="onOpenVenueMap"
+      >
+        <view class="row-center" style="gap: 12rpx;">
+          <ui-icon name="map-pin" size="30" color="#10b981" />
+          <view>
+            <view style="font-size: 26rpx; color: #f4f4f5; font-weight: 600;">
+              {{companion.venueName || 'CueMate 台球俱乐部（望京店）'}}
+            </view>
+            <view style="font-size: 22rpx; color: #71717a; margin-top: 4rpx;">
+              {{companion.venueAddress || '北京市朝阳区望京SOHO 3号楼 B1层'}} · 点击导航
+            </view>
+          </view>
+        </view>
+        <ui-icon name="chevron-right" size="30" color="#71717a" />
+      </view>
     </view>
 
     <view class="section-block">
@@ -133,7 +152,7 @@
         </view>
         <view class="row-center section-sub">
           <ui-icon name="info" size="24" color="#71717a" />
-          <text style="margin-left: 6rpx;">提前2小时预约</text>
+          <text style="margin-left: 6rpx;">已锁定时段不可重复预约</text>
         </view>
       </view>
 
@@ -162,8 +181,23 @@
           bindtap="onToggleSlot"
         >
           <view>{{item.time}}</view>
-          <view wx:if="{{!item.available}}" class="slot-full">已满</view>
+          <view wx:if="{{!item.available}}" class="slot-full">{{item.lockLabel || '已满'}}</view>
         </view>
+      </view>
+
+      <view style="margin-top: 24rpx;">
+        <input
+          class="input-box"
+          value="{{bookingNote}}"
+          bindinput="onNoteInput"
+          placeholder="预约备注：如想重点练习中式八球走位、自带球杆等..."
+          placeholder-style="color:#52525b;"
+        />
+      </view>
+
+      <view class="card-inner row-center" style="margin-top: 20rpx; padding: 18rpx 22rpx; gap: 10rpx;">
+        <ui-icon name="shield-check" size="26" color="#10b981" />
+        <text style="font-size: 22rpx; color: #a1a1aa;">正规绿色台球教学与陪练 · 平台担保结算 · 严禁涉赌与违规场外交易</text>
       </view>
     </view>
   </view>

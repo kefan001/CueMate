@@ -1,4 +1,5 @@
 const store = require('../../utils/store');
+const api = require('../../utils/api');
 const {
   companions,
   generateMockSchedule,
@@ -7,6 +8,7 @@ const {
   getReviewSummary,
   filterReviews,
   formatShortDate,
+  getLockedSlotsForCompanion,
 } = require('../../shared/cuemate-core');
 
 Page({
@@ -18,6 +20,7 @@ Page({
     currentDaySlots: [],
     selectedSlots: [],
     totalPrice: 0,
+    bookingNote: '',
     isBooking: false,
     reviewFilter: 'all',
     reviewSummary: { count: 0, average: 0, positiveRate: 0, distribution: [], topTags: [] },
@@ -27,7 +30,7 @@ Page({
   onLoad(options) {
     const id = options?.id || 'c1';
     this._companionId = id;
-    const schedule = generateMockSchedule();
+    const schedule = generateMockSchedule(true);
     const dates = getSevenDayDates();
     this._schedule = schedule;
     this._dates = dates;
@@ -40,16 +43,30 @@ Page({
   },
 
   syncData(patch = {}) {
-    const companion = companions.find(c => c.id === this._companionId) || companions[0];
-    const { orders } = store.getState();
+    const { orders, companions: storeCompanions } = store.getState();
+    const list = storeCompanions && storeCompanions.length ? storeCompanions : companions;
+    const companion = list.find(c => c.id === this._companionId) || list[0];
     const selectedDate = patch.selectedDate ?? this.data.selectedDate;
     const selectedSlots = patch.selectedSlots ?? this.data.selectedSlots;
     const reviewFilter = patch.reviewFilter ?? this.data.reviewFilter;
+    const dateStr = this._dates[selectedDate]?.fullDateStr || '';
 
-    const rawSlots = (this._schedule[selectedDate]?.slots || []).map(slot => ({
-      ...slot,
-      selected: selectedSlots.includes(slot.time),
-    }));
+    const lockedSet = getLockedSlotsForCompanion(orders, companion.id, dateStr);
+    const isResting = companion.onlineStatus === 'resting';
+
+    const rawSlots = (this._schedule[selectedDate]?.slots || []).map(slot => {
+      const isBooked = lockedSet.has(slot.time);
+      const isClosedByComp = store.isSlotDisabledByCompanion(companion.id, dateStr, slot.time);
+      const available = !isResting && !isBooked && !isClosedByComp && slot.available;
+      return {
+        ...slot,
+        available,
+        lockLabel: isBooked ? '已约满' : isResting || isClosedByComp ? '休息' : '已满',
+        selected: available && selectedSlots.includes(slot.time),
+      };
+    });
+
+    const validSelected = selectedSlots.filter(t => rawSlots.some(s => s.time === t && s.available));
 
     const reviewList = getCompanionReviews(orders, companion.id).map(r => ({
       ...r,
@@ -70,9 +87,9 @@ Page({
       companion,
       dates: this._dates,
       selectedDate,
-      selectedSlots,
+      selectedSlots: validSelected,
       currentDaySlots: rawSlots,
-      totalPrice: selectedSlots.length * companion.hourlyRate,
+      totalPrice: validSelected.length * companion.hourlyRate,
       reviewFilter,
       reviewSummary,
       visibleReviews,
@@ -92,9 +109,22 @@ Page({
     this.syncData({ selectedSlots: next });
   },
 
+  onNoteInput(e) {
+    this.setData({ bookingNote: e.detail.value });
+  },
+
   onSelectReviewFilter(e) {
     const filter = e.currentTarget.dataset.filter;
     this.syncData({ reviewFilter: filter });
+  },
+
+  onOpenVenueMap() {
+    const { companion } = this.data;
+    if (!companion) return;
+    api.openVenueLocation(
+      companion.venueName || 'CueMate 台球俱乐部（望京店）',
+      companion.venueAddress || '北京市朝阳区望京SOHO 3号楼'
+    );
   },
 
   handleOpenChat() {
@@ -110,7 +140,7 @@ Page({
       customerAvatar: user.avatar,
       appointmentDate: dates[selectedDate]?.fullDateStr,
       appointmentSlots: selectedSlots.length ? selectedSlots : undefined,
-      venueName: 'CueMate 台球俱乐部（望京店）',
+      venueName: companion.venueName || 'CueMate 台球俱乐部（望京店）',
     });
     wx.navigateTo({
       url: `/pages/chat-thread/index?threadId=${threadId}`,
@@ -118,13 +148,13 @@ Page({
   },
 
   handleBook() {
-    const { companion, dates, selectedDate, selectedSlots, totalPrice, isBooking } = this.data;
+    const { companion, dates, selectedDate, selectedSlots, totalPrice, bookingNote, isBooking } = this.data;
     if (!companion || selectedSlots.length === 0 || isBooking) return;
     const { user } = store.getState();
     const selectedDateInfo = dates[selectedDate];
     const orderId = `ord_${Date.now()}`;
 
-    store.addOrder({
+    const res = store.addOrder({
       id: orderId,
       companionId: companion.id,
       companionName: companion.name,
@@ -132,9 +162,9 @@ Page({
       customerId: user.id,
       customerName: user.name,
       customerAvatar: user.avatar,
-      venueName: 'CueMate 台球俱乐部（望京店）',
-      venueAddress: '北京市朝阳区望京SOHO 3号楼',
-      note: '希望多给一些走位与发力建议。',
+      venueName: companion.venueName || 'CueMate 台球俱乐部（望京店）',
+      venueAddress: companion.venueAddress || '北京市朝阳区望京SOHO 3号楼',
+      note: bookingNote.trim() || '希望多给一些走位与发力建议。',
       createdAt: new Date().toISOString(),
       date: selectedDateInfo.fullDateStr,
       timeSlots: selectedSlots.slice().sort(),
@@ -142,11 +172,30 @@ Page({
       status: 'pending_payment',
     });
 
+    if (!res.ok) {
+      wx.showToast({ title: res.message || '预约失败', icon: 'none' });
+      this.syncData();
+      return;
+    }
+
     this.setData({ isBooking: true });
-    wx.showToast({ title: '预约成功', icon: 'success' });
-    setTimeout(() => {
-      this.setData({ isBooking: false });
-      wx.redirectTo({ url: '/pages/orders/index' });
-    }, 900);
+    store
+      .requestWeChatPay({
+        orderId,
+        amount: totalPrice,
+        title: `预约 ${companion.name} (${selectedDateInfo.fullDateStr})`,
+      })
+      .then(payRes => {
+        if (payRes && payRes.ok) {
+          store.updateOrder(orderId, { status: 'paid' });
+          wx.showToast({ title: '支付成功，待服务', icon: 'success' });
+        } else {
+          wx.showToast({ title: '订单已生成，请尽快支付', icon: 'none' });
+        }
+        setTimeout(() => {
+          this.setData({ isBooking: false });
+          wx.redirectTo({ url: '/pages/orders/index' });
+        }, 700);
+      });
   },
 });

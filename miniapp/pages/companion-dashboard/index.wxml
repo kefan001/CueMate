@@ -4,6 +4,15 @@
       <view>
         <view class="page-title">接单台</view>
         <view class="page-subtitle">{{me ? me.name + ' · ' + me.level : '陪玩端（演示）'}}</view>
+        <view
+          wx:if="{{me}}"
+          class="pill {{me.onlineStatus === 'resting' ? '' : 'pill-active'}}"
+          style="display:inline-flex;align-items:center;gap:8rpx;margin-top:14rpx;"
+          bindtap="onToggleOnline"
+        >
+          <ui-icon name="check-circle" size="22" color="{{me.onlineStatus === 'resting' ? '#a1a1aa' : '#34d399'}}" />
+          <text>{{me.onlineStatus === 'resting' ? '休息中（点击恢复接单）' : '在线接单中（点击暂停）'}}</text>
+        </view>
       </view>
       <view class="today-box">
         <view class="today-label">今日待服务</view>
@@ -13,6 +22,24 @@
   </view>
 
   <view class="page-body">
+    <view class="card">
+      <view class="row-between">
+        <view>
+          <view class="row-center" style="gap: 8rpx; font-size: 24rpx; color: #a1a1aa;">
+            <ui-icon name="wallet" size="26" color="#10b981" />
+            <text>可提现服务收益（平台分账后）</text>
+          </view>
+          <view style="font-size: 48rpx; font-weight: 700; color: #ffffff; margin-top: 10rpx;">
+            ¥{{withdrawableAmount}}
+          </view>
+          <view style="font-size: 22rpx; color: #71717a; margin-top: 6rpx;">
+            累计完单总额 ¥{{totalEarned}} · 已提现 ¥{{withdrawnTotal}}
+          </view>
+        </view>
+        <view class="btn-sm-primary" bindtap="onWithdraw">提现到零钱</view>
+      </view>
+    </view>
+
     <view class="stat-grid">
       <view class="card stat-card" bindtap="goCompanionOrders">
         <view class="stat-head" style="display:flex;align-items:center;gap:8rpx;">

@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "登录 CueMate",
   "usingComponents": {
-    "ui-icon": "/components/ui-icon/index"
+    "ui-icon": "/components/ui-icon/index",
+    "modal-sheet": "/components/modal-sheet/index"
   }
 }

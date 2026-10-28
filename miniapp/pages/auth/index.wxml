@@ -120,13 +120,36 @@
         <view wx:if="{{hint}}" class="msg-hint">{{hint}}</view>
         <view wx:if="{{demoCode}}" class="msg-demo">演示验证码：{{demoCode}}</view>
 
+        <view class="agree-row" bindtap="toggleAgree">
+          <view class="agree-box {{agreed ? 'agree-box-on' : ''}}">
+            <ui-icon wx:if="{{agreed}}" name="check" size="22" color="#000000" />
+          </view>
+          <view class="agree-text">
+            我已满18周岁并阅读同意
+            <text class="agree-link" data-doc="agreement" catchtap="openDoc">《服务协议》</text>
+            <text class="agree-link" data-doc="privacy" catchtap="openDoc">《隐私指引》</text>
+            <text class="agree-link" data-doc="safety" catchtap="openDoc">《约球安全须知》</text>
+          </view>
+        </view>
+
         <view class="btn-primary submit-btn" bindtap="handleSubmit">
           {{mode === 'login' ? '进入 CueMate' : mode === 'register' ? '注册并进入' : '重置密码'}}
         </view>
 
+        <button
+          wx:if="{{mode === 'login'}}"
+          class="wx-login-btn"
+          open-type="getPhoneNumber"
+          bindgetphonenumber="onWxGetPhone"
+          bindtap="onWxQuickLogin"
+        >
+          <ui-icon name="smartphone" size="30" color="#34d399" />
+          <text>微信手机号一键快捷登录</text>
+        </button>
+
         <view class="demo-tip">
           <view>演示账号：13800138000 / 123456</view>
-          <view>验证码会直接显示在页面中，方便你快速测试真实流程。</view>
+          <view>已接入本地 SQLite 服务端与微信 jscode2session 沙箱联调。</view>
         </view>
       </view>
     </view>
@@ -135,4 +158,11 @@
   <view class="auth-footer">
     登录后可在发现页获取定位，查看你附近的球房与陪玩。
   </view>
+
+  <modal-sheet open="{{!!activeDoc}}" title="{{activeDoc.title}}" bind:close="closeDoc">
+    <view wx:if="{{activeDoc}}" class="doc-body">
+      <text class="doc-content">{{activeDoc.content}}</text>
+      <view class="btn-primary" style="margin-top: 28rpx;" bindtap="confirmDoc">我已阅读并同意</view>
+    </view>
+  </modal-sheet>
 </view>

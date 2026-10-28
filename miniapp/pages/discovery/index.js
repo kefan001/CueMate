@@ -33,20 +33,23 @@ Page({
   },
 
   syncState() {
-    const { user } = store.getState();
+    const { user, companions: storeCompanions } = store.getState();
+    const sourceList = storeCompanions && storeCompanions.length ? storeCompanions : companions;
     const { activeTab, priceMax, query, sort } = this.data;
-    const list = filterAndSortCompanions(companions, { activeTab, priceMax, query, sort });
+    const list = filterAndSortCompanions(sourceList, { activeTab, priceMax, query, sort });
     this.setData({ user, list });
   },
 
   recomputeList(patch = {}) {
+    const { companions: storeCompanions } = store.getState();
+    const sourceList = storeCompanions && storeCompanions.length ? storeCompanions : companions;
     const next = {
       activeTab: patch.activeTab ?? this.data.activeTab,
       priceMax: patch.priceMax ?? this.data.priceMax,
       query: patch.query ?? this.data.query,
       sort: patch.sort ?? this.data.sort,
     };
-    const list = filterAndSortCompanions(companions, next);
+    const list = filterAndSortCompanions(sourceList, next);
     this.setData({ ...patch, list });
   },
 

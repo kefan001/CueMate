@@ -37,7 +37,17 @@
           <view class="order-name">{{item.companionName}}</view>
           <view class="order-time">{{item.timeText}}</view>
           <view class="order-hours">共 {{item.timeSlots.length}} 小时</view>
-          <view wx:if="{{item.venueName}}" class="order-venue">{{item.venueName}}</view>
+          <view
+            wx:if="{{item.venueName}}"
+            class="order-venue row-center"
+            style="gap: 6rpx;"
+            data-venue="{{item.venueName}}"
+            data-address="{{item.venueAddress}}"
+            bindtap="onOpenVenueMap"
+          >
+            <ui-icon name="map-pin" size="22" color="#34d399" />
+            <text>{{item.venueName}} · 导航</text>
+          </view>
         </view>
       </view>
 
@@ -135,10 +145,11 @@
         <text class="balance-val">¥{{user.balance}}</text>
       </view>
       <view wx:if="{{error}}" class="pay-error">{{error}}</view>
-      <view class="pay-hint">支付后可联系陪玩、到店核销，并在异常时申请退款或申诉。</view>
+      <view class="pay-hint">支持微信支付（JSAPI 预付单）或钱包余额直接抵扣，支付后自动开启订单服务通知。</view>
+      <view class="btn-primary" bindtap="confirmWxPay">微信支付 ¥{{payingOrder.totalPrice}}</view>
       <view class="modal-btn-row">
         <view class="btn-secondary half" bindtap="onClosePay">取消</view>
-        <view class="btn-primary half" bindtap="confirmPay">确认支付</view>
+        <view class="btn-secondary half" bindtap="confirmPay">钱包余额抵扣</view>
       </view>
     </view>
   </modal-sheet>
